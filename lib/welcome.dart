@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sanad_software_project/auuth/signup.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/auuth/login.dart';
 import 'package:sanad_software_project/theme.dart';
@@ -27,7 +28,7 @@ class welcome extends StatelessWidget{
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                SizedBox(height: size.height*0.195,),
+                SizedBox(height: 200,),
                 Image.asset("assets/images/welcomePicture.png",width: size.width*0.8,),
                 SizedBox(height: 40,),
                 RoundedButton(
@@ -41,7 +42,9 @@ class welcome extends StatelessWidget{
                   color: primaryLightColor,
                   textColor: Colors.black,
                   text: "إنـشـــاء حـســاب",
-                  press: () {} ,
+                  press: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context){return signup();}));
+                  } ,
                 )
 
 

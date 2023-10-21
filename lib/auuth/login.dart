@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:sanad_software_project/auuth/signup.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
@@ -29,7 +30,7 @@ class _LoginState extends State<Login> {
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> loginfun() async {
-    print("inside funcccc");
+    print("inside login func");
     if(emailController.text.isEmpty){
       setState(() {
         result="يـجــب تـعـبـئـة الإيـمـيـل";
@@ -194,7 +195,9 @@ class _LoginState extends State<Login> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context){return signup();}));
+                            },
                             child: Text(
                               "أنـشـئ حـسـاب",
                               style: TextStyle(
