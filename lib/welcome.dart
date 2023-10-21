@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
-import 'package:sanad_software_project/auth/login.dart';
+import 'package:sanad_software_project/auuth/login.dart';
 import 'package:sanad_software_project/theme.dart';
 
 class welcome extends StatelessWidget{

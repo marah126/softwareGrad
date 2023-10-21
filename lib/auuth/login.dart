@@ -1,9 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
+import 'package:http/http.dart' as http;
+
 
 class Login extends StatefulWidget {
   @override
@@ -13,6 +17,54 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+
+  String result="  ";
+
+  Future<void> fun()async  {
+     print("maraaah");
+  }
+
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> loginfun() async {
+    print("inside funcccc");
+    if(emailController.text.isEmpty){
+      setState(() {
+        result="يـجــب تـعـبـئـة الإيـمـيـل";
+        return;
+      });
+    }
+    else if(passwordController.text.isEmpty){
+      setState(() {
+        result="يـجــب تـعـبـئـة كـلـمـة الــسـر";
+        return;
+      });
+    } else {
+      final response = await http
+          .post(Uri.parse("http://192.168.1.20:3000/sanad/login"), body: {
+        'email': emailController.text.trim(),
+        'password': passwordController.text.trim()
+      });
+      if (response.statusCode == 200) {
+        print("flutter loged in");
+        print(response.body.toString());
+      } else {
+        print("flutter nooooooooo");
+        print(emailController.text);
+        print(passwordController.text);
+        var res = jsonDecode(response.body.toString());
+        print(response.body.toString());
+        print(res['massage']);
+
+        setState(() {
+          result = "الإيـميـل أو كـلمـة الـسـر خــاطـئـة";
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -61,9 +113,16 @@ class _LoginState extends State<Login> {
                     SizedBox(
                       height: 40,
                     ),
+                    Text(result,style: TextStyle(fontFamily: 'myFont',color: Colors.red,fontSize: 18),),
                     RoundedTextField(
                         child: TextField(
                       textAlign: TextAlign.right,
+                      controller: emailController,
+                      onChanged: (value) {
+                        setState(() {
+                          result=" ";
+                        });
+                      },
                       decoration: InputDecoration(
                         hintText: "الـبريد الالـكترونـي أو هـويـة الـطفـل",
                         hintStyle: TextStyle(fontFamily: 'myFont'),
@@ -78,6 +137,12 @@ class _LoginState extends State<Login> {
                         child: TextField(
                       obscureText: true,
                       textAlign: TextAlign.right,
+                      controller: passwordController,
+                      onChanged: (value){
+                        setState(() {
+                          result=" ";
+                        });
+                      },
                       decoration: InputDecoration(
                         hintText: "كــلـمـة الــسـر",
                         hintStyle: TextStyle(fontFamily: 'myFont',),
@@ -117,7 +182,11 @@ class _LoginState extends State<Login> {
                     SizedBox(
                       height: 25,
                     ),
-                    RoundedButton(text: "تـسـجـيـل الــدخــول", press: () {}),
+                    RoundedButton(
+                      text: "تـسـجـيـل الــدخــول",
+                      press: ()=>{
+                        loginfun()
+                      }),
                     SizedBox(
                       height: 20,
                     ),
@@ -141,7 +210,10 @@ class _LoginState extends State<Login> {
                                 color: primaryColor)),
                       ],
                     ),
-                  ],
+                  //   ElevatedButton(onPressed: ()=>{
+                  //     loginfun()
+                  //   }, child: Text("ggg"))
+                   ],
                 )),
               )
             ],
