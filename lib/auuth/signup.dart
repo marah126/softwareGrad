@@ -1,11 +1,15 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/auuth/login.dart';
 import 'package:sanad_software_project/components/radioButtonWithImage.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
+import 'package:http/http.dart' as http;
+
 
 class signup extends StatefulWidget {
   @override
@@ -42,9 +46,24 @@ class _signupState extends State<signup> {
     });
   }
 
-  // Future<void> signupfun() async {
-  //   print("inside check fun");
-  // }
+  Future<void> signupfun() async {
+    print("inside signup fun");
+    final response = await http
+          .post(Uri.parse("http://192.168.1.19:3000/sanad/signup"), body: {
+        'id': idController.text.trim(),
+        'email': emailController.text.trim(),
+        'password':passwordController.text.trim()
+      });
+      if(response.statusCode==200){
+        var mass = jsonDecode(response.body.toString());
+        print("mass");
+      }
+      else{
+        var mass = jsonDecode(response.body.toString());
+        print(mass);
+      }
+  }
+
   void check(){
     print("inside check fun");
     print("ssss");
@@ -64,9 +83,11 @@ class _signupState extends State<signup> {
 
       });
     }
+    else{
+      signupfun();
+    }
     
     print("mmm");
-    print(result);
   }
 
   void passwordStrength(String? pass) {

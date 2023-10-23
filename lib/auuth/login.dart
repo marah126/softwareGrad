@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/auuth/signup.dart';
+import 'package:sanad_software_project/calender.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
@@ -21,9 +22,7 @@ class _LoginState extends State<Login> {
 
   String result="  ";
 
-  Future<void> fun()async  {
-     print("maraaah");
-  }
+  
 
 
   final TextEditingController emailController = TextEditingController();
@@ -44,14 +43,17 @@ class _LoginState extends State<Login> {
       });
     } else {
       final response = await http
-          .post(Uri.parse("http://192.168.1.20:3000/sanad/login"), body: {
+          .post(Uri.parse("http://192.168.1.19:3000/sanad/login"), body: {
         'email': emailController.text.trim(),
         'password': passwordController.text.trim()
       });
       if (response.statusCode == 200) {
         print("flutter loged in");
         print(response.body.toString());
-      } else {
+
+      } 
+      else {
+
         print("flutter nooooooooo");
         print(emailController.text);
         print(passwordController.text);
@@ -162,7 +164,9 @@ class _LoginState extends State<Login> {
                       height: 10,
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                         Navigator.push(context, MaterialPageRoute(builder: (context){return calender();}));
+                      },
                       child: Align(
                           alignment: Alignment.centerLeft,
                           child: Row(children: [
