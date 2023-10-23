@@ -1,33 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:sanad_software_project/theme.dart';
 
-class calender extends StatelessWidget {
+
+class calender extends StatefulWidget {
+  @override
+  _MyCalendarState createState() => _MyCalendarState();
+}
+
+class _MyCalendarState extends State<calender> {
+  List<CustomEvent> events = [];
+
+  void addEvent(DateTime startTime, DateTime endTime, String eventName) {
+    final newEvent = CustomEvent(eventName, startTime, endTime, Colors.blue);
+    events.add(newEvent);
+    setState(() {
+      // Refresh the calendar with the updated event data
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    Size size=MediaQuery.of(context).size;
     return Scaffold(
-        appBar: AppBar(backgroundColor: primaryColor),
-        body: Container(
-          width: double.infinity,
-          height: size.height*0.5,
-          child: SfCalendar(
-            view: CalendarView.week,
-            dataSource: _getCalendarAppointments(),
-            firstDayOfWeek: 7,
-            allowViewNavigation: true,
-            viewHeaderStyle: ViewHeaderStyle(
-              backgroundColor: primaryLightColor,
-            ),
-            headerStyle: CalendarHeaderStyle(backgroundColor: primaryLightColor),
-          ),
-        ));
+      appBar: AppBar(
+        title: Text('Calendar Example'),
+      ),
+      body: SfCalendar(
+        view: CalendarView.week,
+        dataSource: _getCalendarAppointments(),
+        onTap: (CalendarTapDetails details) {
+          if (details.targetElement == CalendarElement.calendarCell) {
+            // User tapped on a calendar cell (block)
+            // Show a dialog or form to add a new event
+            showEventInputDialog(details.date!);
+          }
+          else{
+            print("object");
+          }
+        },
+      ),
+    );
   }
 
   CalendarDataSource _getCalendarAppointments() {
     final List<Appointment> appointments = <Appointment>[];
-    final List<CustomEvent> events = getCustomEvents();
-
     for (final CustomEvent event in events) {
       appointments.add(Appointment(
         startTime: event.from,
@@ -36,8 +51,32 @@ class calender extends StatelessWidget {
         color: event.color,
       ));
     }
-
     return _DataSource(appointments);
+  }
+
+  void showEventInputDialog(DateTime selectedDate) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add New Event'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Date: ${selectedDate.toLocal()}'),
+              TextField(
+                decoration: InputDecoration(labelText: 'Event Name'),
+                onSubmitted: (value) {
+                  // Create the event and add it to the list
+                  addEvent(selectedDate, selectedDate.add(Duration(minutes: 40)), value);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -48,16 +87,6 @@ class CustomEvent {
   DateTime from;
   DateTime to;
   Color color;
-}
-
-List<CustomEvent> getCustomEvents() {
-  return <CustomEvent>[
-    CustomEvent('Event 1', DateTime(2023, 10, 25, 10, 0),
-        DateTime(2023, 10, 25, 12, 0), Colors.blue),
-    CustomEvent('Event 2', DateTime(2023, 10, 26, 14, 0),
-        DateTime(2023, 10, 26, 16, 0), Colors.green),
-    // Add more events as needed
-  ];
 }
 
 class _DataSource extends CalendarDataSource {
