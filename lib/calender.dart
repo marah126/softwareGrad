@@ -1,8 +1,17 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
+
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:sanad_software_project/theme.dart';
+class calendar extends StatefulWidget{
+  @override
+  State<StatefulWidget> createState() {
+    return _calenderState();
+  }
 
-class calender extends StatelessWidget {
+}
+class _calenderState extends State<calendar> {
   @override
   Widget build(BuildContext context) {
     Size size=MediaQuery.of(context).size;
@@ -13,6 +22,23 @@ class calender extends StatelessWidget {
           height: size.height*0.5,
           child: SfCalendar(
             view: CalendarView.week,
+            timeSlotViewSettings: TimeSlotViewSettings(
+              timeInterval: Duration(minutes: 40),
+              timeFormat: 'h:mm',
+              startHour: 8,
+              endHour: 18,
+                timeIntervalHeight: 100,
+              ),
+            cellBorderColor: Color(0xff9990b3),
+            todayHighlightColor: primaryColor,
+            selectionDecoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border.all(color: primaryColor, width: 2),
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            shape: BoxShape.rectangle,
+            ),
+            showNavigationArrow: true,   // اسهم التحرك من اسبوع لاسبوع
+            showDatePickerButton: true,
             dataSource: _getCalendarAppointments(),
             firstDayOfWeek: 7,
             allowViewNavigation: true,
@@ -20,6 +46,8 @@ class calender extends StatelessWidget {
               backgroundColor: primaryLightColor,
             ),
             headerStyle: CalendarHeaderStyle(backgroundColor: primaryLightColor),
+            
+
           ),
         ));
   }

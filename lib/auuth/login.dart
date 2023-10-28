@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/auuth/signup.dart';
+import 'package:sanad_software_project/c.dart';
 import 'package:sanad_software_project/calender.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
@@ -165,7 +166,7 @@ class _LoginState extends State<Login> {
                     ),
                     GestureDetector(
                       onTap: () {
-                         Navigator.push(context, MaterialPageRoute(builder: (context){return calender();}));
+                         Navigator.push(context, MaterialPageRoute(builder: (context){return calendar();}));
                       },
                       child: Align(
                           alignment: Alignment.centerLeft,
@@ -217,10 +218,11 @@ class _LoginState extends State<Login> {
                                 color: primaryColor)),
                       ],
                     ),
-                  //   ElevatedButton(onPressed: ()=>{
-                  //     loginfun()
-                  //   }, child: Text("ggg"))
+                    ElevatedButton(onPressed:() {
+                      Navigator.push(context, MaterialPageRoute(builder: (context){return calenderr();}));
+                    }, child: Text("ggg"))
                    ],
+                   
                 )),
               )
             ],
