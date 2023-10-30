@@ -44,7 +44,7 @@ class _LoginState extends State<Login> {
       });
     } else {
       final response = await http
-          .post(Uri.parse("http://192.168.1.19:3000/sanad/login"), body: {
+          .post(Uri.parse(ip+"/sanad/login"), body: {
         'email': emailController.text.trim(),
         'password': passwordController.text.trim()
       });

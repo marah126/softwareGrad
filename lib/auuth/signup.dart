@@ -49,7 +49,7 @@ class _signupState extends State<signup> {
   Future<void> signupfun() async {
     print("inside signup fun");
     final response = await http
-          .post(Uri.parse("http://192.168.1.19:3000/sanad/signup"), body: {
+          .post(Uri.parse(ip+"/sanad/signup"), body: {
         'id': idController.text.trim(),
         'email': emailController.text.trim(),
         'password':passwordController.text.trim()
