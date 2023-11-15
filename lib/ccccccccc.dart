@@ -1,114 +1,151 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter/widgets.dart';
-// import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-// class MyAppState extends StatelessWidget {
-//   CalendarController _controller = CalendarController();
+void main() {
+  runApp(MyApp());
+}
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//           body: SfCalendar(
-//             view: CalendarView.day,
-//             dataSource: _getCalendarDataSource(),
-//             appointmentBuilder: (BuildContext context,
-//                 CalendarAppointmentDetails details) {
-//               final Appointment meeting =
-//                   details.appointments.first;
-//               final String image = _getImage();
-//               if (_controller.view != CalendarView.month &&
-//                   _controller.view != CalendarView.schedule) {
-//                 return Container(
-//                   child: Column(
-//                     children: [
-//                       Container(
-//                         padding: EdgeInsets.all(3),
-//                         height: 50,
-//                         alignment: Alignment.topLeft,
-//                         decoration: BoxDecoration(
-//                           shape: BoxShape.rectangle,
-//                           borderRadius: BorderRadius.only(
-//                               topLeft: Radius.circular(5),
-//                               topRight: Radius.circular(5)),
-//                           color: meeting.color,
-//                         ),
-//                         child: SingleChildScrollView(
-//                             child: Column(
-//                               mainAxisAlignment: MainAxisAlignment.start,
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Text(
-//                                   meeting.subject,
-//                                   style: TextStyle(
-//                                     color: Colors.white,
-//                                     fontSize: 12,
-//                                     fontWeight: FontWeight.w500,
-//                                   ),
-//                                   maxLines: 3,
-//                                   softWrap: false,
-//                                   overflow: TextOverflow.ellipsis,
-//                                 ),
-//                                 !kIsWeb
-//                                     ? Container()
-//                                     : Text(
-//                                         'Time: ${DateFormat('hh:mm a').format(meeting.startTime)} - ' +
-//                                             '${DateFormat('hh:mm a').format(meeting.endTime)}',
-//                                         style: TextStyle(
-//                                           color: Colors.white,
-//                                           fontSize: 10,
-//                                         ),
-//                                       )
-//                               ],
-//                         )),
-//                       ),
-//                       Container(
-//                         height: details.bounds.height - 70,
-//                         padding: EdgeInsets.fromLTRB(3, 5, 3, 2),
-//                         color: meeting.color.withOpacity(0.8),
-//                         alignment: Alignment.topLeft,
-//                         child: SingleChildScrollView(
-//                             child: Column(
-//                               mainAxisAlignment: MainAxisAlignment.start,
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Padding(
-//                                     padding: EdgeInsets.symmetric(vertical: 5),
-//                                     child: Image(
-//                                         image:
-//                                             ExactAssetImage('images/' + image + '.png'),
-//                                         fit: BoxFit.contain,
-//                                         width: details.bounds.width,
-//                                         height: 60)),
-//                                 Text(
-//                                   meeting.notes!,
-//                                   style: TextStyle(
-//                                     color: Colors.white,
-//                                     fontSize: 10,
-//                                   ),
-//                                 )
-//                               ],
-//                         )),
-//                       ),
-//                       Container(
-//                         height: 20,
-//                         decoration: BoxDecoration(
-//                           shape: BoxShape.rectangle,
-//                           borderRadius: BorderRadius.only(
-//                               bottomLeft: Radius.circular(5),
-//                               bottomRight: Radius.circular(5)),
-//                           color: meeting.color,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 );
-//               }
-//               return Container(
-//                 child: Text(meeting.subject),
-//               );
-//             },
-//       )),
-//     );
-//   }
-// }
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyCalendar(),
+    );
+  }
+}
+
+class MyCalendar extends StatefulWidget {
+  @override
+  _MyCalendarState createState() => _MyCalendarState();
+}
+
+class _MyCalendarState extends State<MyCalendar> {
+  List<DateTime> visibleDates = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Event Calendar'),
+      ),
+      body: Container(
+        child: SfCalendar(
+          view: CalendarView.week,
+          dataSource: _getCalendarAppointments(),
+          scheduleViewSettings: ScheduleViewSettings(
+            hideEmptyScheduleWeek: true,
+          ),
+          
+          appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
+            return SingleChildScrollView(
+              child: Column(
+                children: details.appointments!.map((appointment) {
+                  return Container(
+                    width: details.bounds.width,
+                    decoration: BoxDecoration(
+                      color: appointment.color,
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        _showAppointmentDetails(context, appointment);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Subject: ${appointment.subject}'),
+                            Text('Start Time: ${appointment.startTime}'),
+                            Text('End Time: ${appointment.endTime}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          },
+          onTap: (CalendarTapDetails details) {
+            if (details.targetElement == CalendarElement.appointment) {
+              // Handle appointment tap
+              Appointment tappedAppointment = details.appointments![0];
+              _showAppointmentDetails(context, tappedAppointment);
+            } else {
+              print("No appointment tapped.");
+            }
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Use the visibleDates as needed
+          print('Visible Dates: $visibleDates');
+        },
+        child: Icon(Icons.print),
+      ),
+    );
+  }
+
+  CalendarDataSource _getCalendarAppointments() {
+    List<Appointment> appointments = <Appointment>[
+      Appointment(
+        startTime: DateTime(2023, 11, 14, 10, 0, 0),
+        endTime: DateTime(2023, 11, 14, 11, 0, 0),
+        subject: 'Meeting 1',
+        color: Colors.blue,
+      ),
+      Appointment(
+        startTime: DateTime(2023, 11, 14, 10, 0, 0),
+        endTime: DateTime(2023, 11, 14, 11, 0, 0),
+        subject: 'Meeting 2',
+        color: Colors.green,
+      ),
+      // Add more appointments at the same time
+      Appointment(
+        startTime: DateTime(2023, 11, 14, 10, 0, 0),
+        endTime: DateTime(2023, 11, 14, 11, 0, 0),
+        subject: 'Meeting 3',
+        color: Colors.red,
+      ),
+      // Add more appointments as needed
+    ];
+
+    return _DataSource(appointments);
+  }
+
+  void _showAppointmentDetails(BuildContext context, Appointment appointment) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Appointment Details'),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Subject: ${appointment.subject}'),
+              Text('Start Time: ${appointment.startTime}'),
+              Text('End Time: ${appointment.endTime}'),
+              // Add more details as needed
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _DataSource extends CalendarDataSource {
+  _DataSource(List<Appointment> source) {
+    appointments = source;
+  }
+}

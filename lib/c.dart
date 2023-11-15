@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
+import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
@@ -15,8 +16,12 @@ class calenderr extends StatefulWidget {
 }
 
 class _MyCalendarState extends State<calenderr> {
+
+  CalendarController _calendarController=CalendarController();
+  
   final TextEditingController textEditingController = TextEditingController();
   int autoID=0;
+  TimeOfDay timeOfDay=TimeOfDay(hour: 8, minute: 0);
   @override
   void dispose() {
     textEditingController.dispose();
@@ -74,15 +79,16 @@ class _MyCalendarState extends State<calenderr> {
   String selectedValue = children.first;
   String selectedValue2 = specialests.first;
   String selectedValue3 = sessions.first;
+  String selectedDateweek="";
 
   List<CustomEvent> events = [];
+  List<DateTime> visibleDates = [];
+  List<String> visibleDatesString =[];
 
-  void addEvent(int id, DateTime startTime, DateTime endTime, String child,
-      String specialest, String session, Color c) {
-    final newEvent = CustomEvent(
-        id, child, specialest, session, startTime, endTime, c);
-    events.add(newEvent);
-    setState(() {
+  void addEvent(int id, DateTime startTime, DateTime endTime, String child,String specialest, String session, Color c) {
+      final newEvent = CustomEvent(id, child, specialest, session, startTime, endTime, c);
+      events.add(newEvent);
+      setState(() {
       // Refresh the calendar with the updated event data
     });
   }
@@ -90,6 +96,32 @@ class _MyCalendarState extends State<calenderr> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton:  Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [ FloatingActionButton(
+            key: UniqueKey(),
+        backgroundColor: primaryColor,
+          onPressed: () {
+            
+            print('Floating Action Button Pressed!');
+            
+            selectedDateweek=visibleDatesString.first;
+            for(int i=0;i<visibleDates.length;i++){
+              print(visibleDates[i]);
+              print(visibleDatesString[i]);
+            }
+            addMoreEvents(visibleDates);
+          },
+          child: Icon(Icons.add),),
+          SizedBox(height: 10,),
+        //    FloatingActionButton(
+        //     key: UniqueKey(),
+        // backgroundColor: primaryColor,
+        //   onPressed: () {
+        //     _switchCalendarView();
+        //   }
+        //    )
+          ]),
       appBar: AppBar(
         title: Text('Calendar '),
         backgroundColor: primaryColor,
@@ -100,6 +132,7 @@ class _MyCalendarState extends State<calenderr> {
          final Appointment appointment = details.appointments.elementAt(0);
 
           return Container(
+            
             color: appointment.color,
             child: Text(
               appointment.subject,
@@ -113,6 +146,7 @@ class _MyCalendarState extends State<calenderr> {
             ),
           );
         },
+        controller: _calendarController,
         view: CalendarView.week,
         timeSlotViewSettings: TimeSlotViewSettings(
           timeInterval: Duration(minutes: 40),
@@ -140,36 +174,58 @@ class _MyCalendarState extends State<calenderr> {
         ),
         headerStyle: CalendarHeaderStyle(backgroundColor: primaryLightColor),
         onTap: (CalendarTapDetails details) {
-          if (details.targetElement == CalendarElement.calendarCell) {
-            // User tapped on a calendar cell (block)
-            // Show a dialog or form to add a new event
-            showEventInputDialog(details,false);
+          if (details.targetElement == CalendarElement.appointment) {
+            
+            showdetailesDialog(details);
+           // showEventInputDialog(details,false);
           } else {
-             showdetailesDialog(details);
-            print(details.appointments!.length);
-            print(details.appointments![0].id);
-            print("object");
+            showEventInputDialog(details,false);
+             //showdetailesDialog(details);
+            // print(details.appointments!.length);
+            // print(details.appointments![0].id);
+            // print("object");
           }
         },
+        onViewChanged: (ViewChangedDetails viewChangedDetails) {
+            visibleDates = viewChangedDetails.visibleDates;
+            visibleDatesString=[];
+            String s="";
+            for(int i=0; i<visibleDates.length;i++){
+              s=(DateFormat('MM/dd').format(visibleDates[i]).toString());
+              //s=visibleDates[i].toString();
+              visibleDatesString.add(s);
+            }
+          },
       ),
     );
   }
 
   CalendarDataSource _getCalendarAppointments() {
+    DateTime d=DateTime.now();
+    d=d.add(const Duration(days: 10));
     final List<Appointment> appointments = <Appointment>[];
+    
     for (final CustomEvent event in events) {
       appointments.add(Appointment(
         id:event.id,
         startTime: event.from,
         endTime: event.to,
-        subject: event.child + "\n" + event.specialest + "\n" + event.session,
+        subject: event.child ,
         color: event.color,
+        recurrenceRule: 'FREQ=DAILY;INTERVAL=7;UNTIL=$d'
         
       ));
     }
     return _DataSource(appointments);
   }
-
+void _switchCalendarView() {
+    // Toggle between 'week' and 'day' views
+    if (_calendarController.view == CalendarView.week) {
+      _calendarController.view = CalendarView.day;
+    } else {
+      _calendarController.view = CalendarView.week;
+    }
+  }
   void showEventInputDialog(CalendarTapDetails selectedDate,bool flag) {
     int id;
     if(flag==true){
@@ -508,61 +564,7 @@ class _MyCalendarState extends State<calenderr> {
                             menuItemStyleData: const MenuItemStyleData(
                               height: 40,
                             ),
-                            dropdownSearchData: DropdownSearchData(
-                              searchController: textEditingController,
-                              searchInnerWidgetHeight: 50,
-                              searchInnerWidget: Container(
-                                height: 50,
-                                padding: const EdgeInsets.only(
-                                  top: 8,
-                                  bottom: 4,
-                                  right: 8,
-                                  left: 8,
-                                ),
-                                child: TextFormField(
-                                  expands: true,
-                                  maxLines: null,
-                                  controller: textEditingController,
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 8,
-                                    ),
-                                    hintText: 'Search...',
-                                    hintStyle: const TextStyle(fontSize: 12),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
-                                        color:
-                                            primaryLightColor, // Change this color to your desired border color
-                                        width:
-                                            2.0, // Change this width if needed
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
-                                        color:
-                                            primaryColor, // Border color when focused
-                                        width: 2.0,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              searchMatchFn: (item, searchValue) {
-                                return item.value
-                                    .toString()
-                                    .contains(searchValue);
-                              },
-                            ),
-                            //This to clear the search value when you close the menu
-                            onMenuStateChange: (isOpen) {
-                              if (!isOpen) {
-                                textEditingController.clear();
-                              }
-                            },
+                           
                           ),
                         ),
                       ),
@@ -573,16 +575,9 @@ class _MyCalendarState extends State<calenderr> {
                         text: "حــجــز",
                         press: () {
                           color = colorMap[ss.toLowerCase()]!;
-                          if(flag==false)
-                            autoID++;
-                            id=autoID;
-                          addEvent(
-                              id,
-                              selectedDate.date!,
-                              selectedDate.date!.add(Duration(minutes: 40)),
-                              ch,
-                              sp,
-                              ss,color);
+                          if(flag==false) autoID++;
+                          id=autoID;
+                          addEvent(id,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),ch,sp, ss,color);
                           print(ch);
                           print(sp);
                           print(ss);
@@ -691,6 +686,477 @@ class _MyCalendarState extends State<calenderr> {
                   }))));
         });
   }
+
+  void addMoreEvents(List<DateTime>vdates){
+    int id;
+    Color  color;
+    Size size = MediaQuery.of(context).size;
+    String ch = "";
+    String sp = "";
+    String ss = "";
+    String h=timeOfDay.hour.toString();
+    String m = timeOfDay.minute.toString();
+    String dd=visibleDatesString.first;
+    DateTime datedate;
+    if (timeOfDay.hour > 12) {
+      int hh = timeOfDay.hour;
+      hh = hh - 12;
+      setState(
+        () => h = hh.toString(),
+      );
+    }
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text(
+              'إضــافــة مــوعــد جــديــد',
+              style: TextStyle(
+                fontFamily: 'myFont',
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: secondaryColor,
+              ),
+              textAlign: TextAlign.right,
+            ),
+            content: Container(
+              color: Colors.white,
+              width: size.width * 0.5,
+              height: size.height * 0.7,
+              child: SingleChildScrollView(
+                child: StatefulBuilder(builder: (context, setState) {
+                  // Use StatefulBuilder here
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        ' التــاريــخ:',
+                        style: TextStyle(
+                          fontFamily: 'myFont',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: secondaryColor,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                      Container(
+                        width: size.width * 0.5,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton2<String>(
+                            isExpanded: true,
+                            hint: Text(
+                              'Select Item',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                            items: visibleDatesString
+                                .map((item) => DropdownMenuItem(
+                                      value: item,
+                                      child: Text(
+                                        item,
+                                        style: const TextStyle(
+                                            fontSize: 14, fontFamily: 'myFont'),
+                                      ),
+                                    ))
+                                .toList(),
+                            value: selectedDateweek,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedDateweek = value!;
+                                dd = value! ;
+                              });
+                            },
+                            buttonStyleData: ButtonStyleData(
+                              height: 50,
+                              width: 160,
+                              padding:
+                                  const EdgeInsets.only(left: 14, right: 14),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  border:
+                                      Border.all(color: primaryColor, width: 2),
+                                  color: Colors.white),
+                              elevation: 2,
+                            ),
+                            dropdownStyleData: const DropdownStyleData(
+                              maxHeight: 200,
+                            ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              height: 40,
+                            ),
+                            
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Text("الــوقــــت",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontFamily: 'myFont',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: secondaryColor,
+                          )),
+                       SizedBox(
+                        height: 5,
+                      ), 
+                      Container(
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(left: 14, right: 14),
+                        width: size.width * 0.5,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: primaryColor, width: 2),
+                            color: Colors.white),
+                        child: GestureDetector(
+                          child: Text(h+':'+m),
+                          onTap: () async {
+                            TimeOfDay?newtime= await showTimePicker(
+                                context: context, initialTime: timeOfDay);
+                            if(newtime ==null)return;
+                            setState(() => timeOfDay=newtime,);
+                            setState(() => m=timeOfDay.minute.toString(),);
+                            setState(() => h=timeOfDay.hour.toString());
+                            if(timeOfDay.hour>12){
+                              int hh=timeOfDay.hour;
+                              hh=hh-12;
+                            setState(() => h=hh.toString(),);
+                            }
+
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 15,),  
+                      Text("الــطــفــل",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontFamily: 'myFont',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: secondaryColor,
+                          )),
+                      Container(
+                        width: size.width * 0.5,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton2<String>(
+                            isExpanded: true,
+                            hint: Text(
+                              'Select Item',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                            items: children
+                                .map((item) => DropdownMenuItem(
+                                      value: item,
+                                      child: Text(
+                                        item,
+                                        style: const TextStyle(
+                                            fontSize: 14, fontFamily: 'myFont'),
+                                      ),
+                                    ))
+                                .toList(),
+                            value: selectedValue,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedValue = value!;
+                                ch = value!;
+                              });
+                            },
+                            buttonStyleData: ButtonStyleData(
+                              height: 50,
+                              width: 160,
+                              padding:
+                                  const EdgeInsets.only(left: 14, right: 14),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  border:
+                                      Border.all(color: primaryColor, width: 2),
+                                  color: Colors.white),
+                              elevation: 2,
+                            ),
+                            dropdownStyleData: const DropdownStyleData(
+                              maxHeight: 200,
+                            ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              height: 40,
+                            ),
+                            dropdownSearchData: DropdownSearchData(
+                              searchController: textEditingController,
+                              searchInnerWidgetHeight: 50,
+                              searchInnerWidget: Container(
+                                height: 50,
+                                padding: const EdgeInsets.only(
+                                  top: 8,
+                                  bottom: 4,
+                                  right: 8,
+                                  left: 8,
+                                ),
+                                child: TextFormField(
+                                  expands: true,
+                                  maxLines: null,
+                                  controller: textEditingController,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 8,
+                                    ),
+                                    hintText: 'Search...',
+                                    hintStyle: const TextStyle(fontSize: 12),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color:
+                                            primaryLightColor, // Change this color to your desired border color
+                                        width:
+                                            2.0, // Change this width if needed
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color:
+                                            primaryColor, // Border color when focused
+                                        width: 2.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              searchMatchFn: (item, searchValue) {
+                                return item.value
+                                    .toString()
+                                    .contains(searchValue);
+                              },
+                            ),
+                            //This to clear the search value when you close the menu
+                            onMenuStateChange: (isOpen) {
+                              if (!isOpen) {
+                                textEditingController.clear();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                      Text("الأخــصـــائــيــة",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontFamily: 'myFont',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: secondaryColor,
+                          )),
+                      Container(
+                        width: size.width * 0.5,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton2<String>(
+                            isExpanded: true,
+                            hint: Text(
+                              'Select Item',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                            items: specialests
+                                .map((item) => DropdownMenuItem(
+                                      value: item,
+                                      child: Text(
+                                        item,
+                                        style: const TextStyle(
+                                            fontSize: 14, fontFamily: 'myFont'),
+                                      ),
+                                    ))
+                                .toList(),
+                            value: selectedValue2,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedValue2 = value!;
+                                sp = value!;
+                              });
+                            },
+                            buttonStyleData: ButtonStyleData(
+                              height: 50,
+                              width: 160,
+                              padding:
+                                  const EdgeInsets.only(left: 14, right: 14),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  border:
+                                      Border.all(color: primaryColor, width: 2),
+                                  color: Colors.white),
+                              elevation: 2,
+                            ),
+                            dropdownStyleData: const DropdownStyleData(
+                              maxHeight: 200,
+                            ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              height: 40,
+                            ),
+                            dropdownSearchData: DropdownSearchData(
+                              searchController: textEditingController,
+                              searchInnerWidgetHeight: 50,
+                              searchInnerWidget: Container(
+                                height: 50,
+                                padding: const EdgeInsets.only(
+                                  top: 8,
+                                  bottom: 4,
+                                  right: 8,
+                                  left: 8,
+                                ),
+                                child: TextFormField(
+                                  expands: true,
+                                  maxLines: null,
+                                  controller: textEditingController,
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 8,
+                                    ),
+                                    hintText: 'Search...',
+                                    hintStyle: const TextStyle(fontSize: 12),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color:
+                                            primaryLightColor, // Change this color to your desired border color
+                                        width:
+                                            2.0, // Change this width if needed
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color:
+                                            primaryColor, // Border color when focused
+                                        width: 2.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              searchMatchFn: (item, searchValue) {
+                                return item.value
+                                    .toString()
+                                    .contains(searchValue);
+                              },
+                            ),
+                            //This to clear the search value when you close the menu
+                            onMenuStateChange: (isOpen) {
+                              if (!isOpen) {
+                                textEditingController.clear();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                      Text("نــوع الجــلــســة",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontFamily: 'myFont',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: secondaryColor,
+                          )),
+                      Container(
+                        width: size.width * 0.5,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton2<String>(
+                            isExpanded: true,
+                            hint: Text(
+                              'Select Item',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                            items: sessions
+                                .map((item) => DropdownMenuItem(
+                                      value: item,
+                                      child: Text(
+                                        item,
+                                        style: const TextStyle(
+                                            fontSize: 14, fontFamily: 'myFont'),
+                                      ),
+                                    ))
+                                .toList(),
+                            value: selectedValue3,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedValue3 = value!;
+                                ss = value!;
+                              });
+                            },
+                            buttonStyleData: ButtonStyleData(
+                              height: 50,
+                              width: 160,
+                              padding:
+                                  const EdgeInsets.only(left: 14, right: 14),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  border:
+                                      Border.all(color: primaryColor, width: 2),
+                                  color: Colors.white),
+                              elevation: 2,
+                            ),
+                            dropdownStyleData: const DropdownStyleData(
+                              maxHeight: 200,
+                            ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              height: 40,
+                            ),
+                            
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      RoundedButton(
+                        text: "حــجــز",
+                        press: () {
+                          color = colorMap[ss.toLowerCase()]!;
+                          autoID++;
+                          id=autoID;
+                          int index=visibleDatesString.indexOf(dd);
+                          datedate=visibleDates[index];
+                          datedate=new DateTime(datedate.year,datedate.month,datedate.day,timeOfDay.hour,timeOfDay.minute);
+                          addEvent(id,datedate,datedate.add(Duration(minutes: 40)),ch,sp,ss,color);
+                          print(ch);
+                          print(sp);
+                          print(ss);
+                          print(events.length);
+                          print(datedate);
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  );
+                }),
+              ),
+            ));
+      },
+    );
+  }
+
+
 }
 
 class CustomEvent {
