@@ -1,7 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:math';
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
@@ -9,6 +5,9 @@ import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class calenderr extends StatefulWidget {
   @override
@@ -17,24 +16,31 @@ class calenderr extends StatefulWidget {
 
 class _MyCalendarState extends State<calenderr> {
 
-  CalendarController _calendarController=CalendarController();
-  
-  final TextEditingController textEditingController = TextEditingController();
-  int autoID=0;
-  TimeOfDay timeOfDay=TimeOfDay(hour: 8, minute: 0);
-  @override
-  void dispose() {
-    textEditingController.dispose();
-    super.dispose();
-  }
- Map<String, Color> colorMap = {
-     'الـلغـة و نــطــق':primaryLightColor,
-    'ســلــوكــي':Color(0xffb1a1b3),
-    'وظــيــفــي':Color(0xfffff9e6),
-    'تــربـيـة خـاصـة':Color(0xffe6f6ff),
-    'عــلاج طــبـيـعي':Color(0xffEBFFE5)
+  Map<String, Color> colorMap = {
+    'الـلغـة و نــطــق': primaryLightColor,
+    'ســلــوكــي': Color(0xffb1a1b3),
+    'وظــيــفــي': Color(0xfffff9e6),
+    'تــربـيـة خـاصـة': Color(0xffe6f6ff),
+    'عــلاج طــبـيـعي': Color(0xffEBFFE5)
   };
-  static const List<String> children = [
+  static  List<String> children = [
+     ' ',
+    // 'Item 2',
+    // 'Item 3',
+    // 'Item 4',
+    // 'Item 5',
+    // 'Item 11',
+    // 'Item 21',
+    // 'Item 31',
+    // 'Item 41',
+    // 'Item 51',
+    // 'Item 12',
+    // 'Item 22',
+    // 'Item 32',
+    // 'Item 42',
+    // 'Item 52',
+  ];
+  static  List<String> specialests = [
     'Item 1',
     'Item 2',
     'Item 3',
@@ -51,24 +57,7 @@ class _MyCalendarState extends State<calenderr> {
     'Item 42',
     'Item 52',
   ];
-  static const List<String> specialests = [
-    'Item 1',
-    'Item 2',
-    'Item 3',
-    'Item 4',
-    'Item 5',
-    'Item 11',
-    'Item 21',
-    'Item 31',
-    'Item 41',
-    'Item 51',
-    'Item 12',
-    'Item 22',
-    'Item 32',
-    'Item 42',
-    'Item 52',
-  ];
-
+  List<CustomEvent> events = [];
   static const List<String> sessions = [
     'الـلغـة و نــطــق',
     'ســلــوكــي',
@@ -79,16 +68,144 @@ class _MyCalendarState extends State<calenderr> {
   String selectedValue = children.first;
   String selectedValue2 = specialests.first;
   String selectedValue3 = sessions.first;
-  String selectedDateweek="";
+  String selectedDateweek = "";
+  String day="";
 
-  List<CustomEvent> events = [];
   List<DateTime> visibleDates = [];
-  List<String> visibleDatesString =[];
+  List<String> visibleDatesString = [];
+  late CustomEvent newSession;
 
-  void addEvent(int id, DateTime startTime, DateTime endTime, String child,String specialest, String session, Color c) {
-      final newEvent = CustomEvent(id, child, specialest, session, startTime, endTime, c);
-      events.add(newEvent);
-      setState(() {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  
+  
+  Future<void> getChildrenNames() async{
+    int x=0;
+    if (x == 0) {
+      print("childrenssssssssssss");
+      final childreNamesResponse =
+          await http.get(Uri.parse(ip + "/sanad/getchname"));
+      if (childreNamesResponse.statusCode == 200) {
+        children.clear();
+        String childName;
+        final List<dynamic> data = jsonDecode(childreNamesResponse.body);
+
+        for (int i = 0; i < data.length; i++) {
+          print(data[i]['Fname'] + " " + data[i]['Lname']);
+          childName = data[i]['Fname'] + " " + data[i]['Lname'];
+          setState(() {
+            children.add(childName);
+          });
+        }
+        for(int i=0;i<children.length;i++){
+          print("ch"+children[i]);
+        }
+      } else {
+        print("errrrrrrrror");
+      }
+      x++;
+    }
+      if (x == 1) {
+      final specialestNamesResponse =
+          await http.get(Uri.parse(ip + "/sanad/getspname"));
+      if (specialestNamesResponse.statusCode == 200) {
+        specialests.clear();
+        String spName;
+        final List<dynamic> data2 = jsonDecode(specialestNamesResponse.body);
+
+        for (int i = 0; i < data2.length; i++) {
+          print(data2[i]['Fname'] + " " + data2[i]['Lname']);
+          spName = data2[i]['Fname'] + " " + data2[i]['Lname'];
+          setState(() {
+            specialests.add(spName);
+          });
+        }
+        for(int i=0;i<specialests.length;i++){
+          print("sp"+specialests[i]);
+        }
+      } else {
+        print("errrrrrrrror");
+      }
+    }
+  }
+
+
+  Future<void> addNewSession() async {
+    final response =
+        await http.post(Uri.parse(ip + "/sanad/addsession"), body: {
+          'id':newSession.id.toString(),
+          'child': newSession.child,
+          'specialest': newSession.specialest,
+          'session': newSession.session,
+          'date': newSession.from.toUtc().toIso8601String(),
+          'day': day
+    });
+
+    if (response.statusCode == 200) {
+      print("new sesission added");
+    } else {
+      print(response);
+    }
+  }
+  
+
+  Future<void> getAllSessions()async{
+
+    CustomEvent e;
+    DateTime dd;
+    String s;
+    final allSessions=await http.get(Uri.parse(ip+"/sanad/getallsessions"));
+    if (allSessions.statusCode == 200) {
+        String childName;
+        final List<dynamic> data = jsonDecode(allSessions.body);
+        autoID=data.length;
+        print("autoid= "+autoID.toString());
+        for(int i=0;i<data.length;i++){
+          print(data[i]);
+          dd=DateTime.parse(data[i]['date']).toLocal();
+          s=data[i]['session'];
+          e=CustomEvent(data[i]['idd'], data[i]['child'], data[i]['specialest'], data[i]['session'], dd, dd.add(Duration(minutes: 40)), colorMap[s.toLowerCase()]!);
+          events.add(e);
+        }
+    }
+  }
+
+  Future<void> _loadData() async {
+  await getChildrenNames();
+  await getAllSessions();
+  // Additional code that should execute after both functions are complete
+}
+
+  @override
+    void initState() {
+      super.initState();
+      
+      // Call your function here
+       getChildrenNames();
+       getAllSessions();
+      //_loadData();
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  CalendarController _calendarController = CalendarController();
+
+  final TextEditingController textEditingController = TextEditingController();
+  int autoID = 0;
+  TimeOfDay timeOfDay = TimeOfDay(hour: 8, minute: 0);
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
+  }
+
+  
+  void addEvent(int id, DateTime startTime, DateTime endTime, String child,
+      String specialest, String session, Color c) {
+    final newEvent =
+        CustomEvent(id, child, specialest, session, startTime, endTime, c);
+    events.add(newEvent);
+    setState(() {
       // Refresh the calendar with the updated event data
     });
   }
@@ -96,51 +213,51 @@ class _MyCalendarState extends State<calenderr> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton:  Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [ FloatingActionButton(
-            key: UniqueKey(),
-        backgroundColor: primaryColor,
+      floatingActionButton:
+          Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+        FloatingActionButton(
+          heroTag: UniqueKey(),
+          backgroundColor: primaryColor,
           onPressed: () {
-            
             print('Floating Action Button Pressed!');
-            
-            selectedDateweek=visibleDatesString.first;
-            for(int i=0;i<visibleDates.length;i++){
+
+            selectedDateweek = visibleDatesString.first;
+            for (int i = 0; i < visibleDates.length; i++) {
               print(visibleDates[i]);
               print(visibleDatesString[i]);
             }
             addMoreEvents(visibleDates);
           },
-          child: Icon(Icons.add),),
-          SizedBox(height: 10,),
-        //    FloatingActionButton(
-        //     key: UniqueKey(),
-        // backgroundColor: primaryColor,
-        //   onPressed: () {
-        //     _switchCalendarView();
-        //   }
-        //    )
-          ]),
+          child: Icon(Icons.add),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        FloatingActionButton(
+            heroTag: UniqueKey(),
+            backgroundColor: primaryColor,
+            onPressed: () {
+              _switchCalendarView();
+            
+            })
+      ]),
       appBar: AppBar(
         title: Text('Calendar '),
         backgroundColor: primaryColor,
       ),
       body: SfCalendar(
-        
-        appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
-         final Appointment appointment = details.appointments.elementAt(0);
+        appointmentBuilder:
+            (BuildContext context, CalendarAppointmentDetails details) {
+          final Appointment appointment = details.appointments.elementAt(0);
 
           return Container(
-            
             color: appointment.color,
             child: Text(
               appointment.subject,
               style: TextStyle(
-                color: secondaryColor, 
-                fontFamily: 'myFont'// Text color
-                // Other text styles (font size, weight, etc.) can be customized here
-              ),
+                  color: secondaryColor, fontFamily: 'myFont' // Text color
+                  // Other text styles (font size, weight, etc.) can be customized here
+                  ),
               maxLines: 5, // Ensure text stays on a single line
               overflow: TextOverflow.ellipsis, // Add ellipsis for overflow
             ),
@@ -175,50 +292,50 @@ class _MyCalendarState extends State<calenderr> {
         headerStyle: CalendarHeaderStyle(backgroundColor: primaryLightColor),
         onTap: (CalendarTapDetails details) {
           if (details.targetElement == CalendarElement.appointment) {
-            
             showdetailesDialog(details);
-           // showEventInputDialog(details,false);
+            // showEventInputDialog(details,false);
           } else {
-            showEventInputDialog(details,false);
-             //showdetailesDialog(details);
+            showEventInputDialog(details, false);
+            //showdetailesDialog(details);
             // print(details.appointments!.length);
             // print(details.appointments![0].id);
             // print("object");
           }
         },
         onViewChanged: (ViewChangedDetails viewChangedDetails) {
-            visibleDates = viewChangedDetails.visibleDates;
-            visibleDatesString=[];
-            String s="";
-            for(int i=0; i<visibleDates.length;i++){
-              s=(DateFormat('MM/dd').format(visibleDates[i]).toString());
-              //s=visibleDates[i].toString();
-              visibleDatesString.add(s);
-            }
-          },
+          visibleDates = viewChangedDetails.visibleDates;
+          visibleDatesString = [];
+          String s = "";
+          for (int i = 0; i < visibleDates.length; i++) {
+            s = (DateFormat('MM/dd').format(visibleDates[i]).toString());
+            //s=visibleDates[i].toString();
+            visibleDatesString.add(s);
+          }
+        },
       ),
     );
   }
 
   CalendarDataSource _getCalendarAppointments() {
-    DateTime d=DateTime.now();
-    d=d.add(const Duration(days: 10));
+    DateTime d = DateTime.now();
+    DateTime firstDayOfNextMonth = DateTime(d.year, d.month + 1, 1);
+    DateTime lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
+   // d = d.add(const Duration(days: 10));
     final List<Appointment> appointments = <Appointment>[];
-    
+
     for (final CustomEvent event in events) {
       appointments.add(Appointment(
-        id:event.id,
-        startTime: event.from,
-        endTime: event.to,
-        subject: event.child ,
-        color: event.color,
-        recurrenceRule: 'FREQ=DAILY;INTERVAL=7;UNTIL=$d'
-        
-      ));
+          id: event.id,
+          startTime: event.from,
+          endTime: event.to,
+          subject: event.child,
+          color: event.color,
+          recurrenceRule: 'FREQ=DAILY;INTERVAL=7;UNTIL=$lastDayOfCurrentMonth'));
     }
     return _DataSource(appointments);
   }
-void _switchCalendarView() {
+
+  void _switchCalendarView() {
     // Toggle between 'week' and 'day' views
     if (_calendarController.view == CalendarView.week) {
       _calendarController.view = CalendarView.day;
@@ -226,17 +343,28 @@ void _switchCalendarView() {
       _calendarController.view = CalendarView.week;
     }
   }
-  void showEventInputDialog(CalendarTapDetails selectedDate,bool flag) {
+
+  void showEventInputDialog(CalendarTapDetails selectedDate, bool flag) {
     int id;
-    if(flag==true){
-      id=selectedDate.appointments![0].id;
-      events.removeWhere((element) => element.id == id);
-    }
-    Color  color;
+    selectedValue=children.first;
+    selectedValue2=specialests.first;
+    print("xxxxxxxx"+selectedValue);
+    Color color;
     Size size = MediaQuery.of(context).size;
     String ch = "";
     String sp = "";
     String ss = "";
+    if(flag==false){
+      ch=children.first;
+      sp=specialests.first;
+      ss=sessions.first;
+    }else{
+      id = selectedDate.appointments![0].id;
+      //events.firstWhere((element) => element.id == id);
+      ch=events.firstWhere((element) => element.id == id).child;
+      sp=events.firstWhere((element) => element.id == id).specialest;
+      ss=events.firstWhere((element) => element.id == id).session;
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -564,7 +692,6 @@ void _switchCalendarView() {
                             menuItemStyleData: const MenuItemStyleData(
                               height: 40,
                             ),
-                           
                           ),
                         ),
                       ),
@@ -575,13 +702,21 @@ void _switchCalendarView() {
                         text: "حــجــز",
                         press: () {
                           color = colorMap[ss.toLowerCase()]!;
-                          if(flag==false) autoID++;
-                          id=autoID;
-                          addEvent(id,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),ch,sp, ss,color);
+                          if (flag == true) {
+                            id = selectedDate.appointments![0].id;
+                            events.removeWhere((element) => element.id == id);
+                          }
+                          if (flag == false) autoID++;
+                          id = autoID;
+                          addEvent(
+                              id,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),ch,sp, ss,color);
+                          newSession= CustomEvent(id,ch,sp,ss,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),color);
+                          addNewSession();
                           print(ch);
                           print(sp);
                           print(ss);
                           print(events.length);
+                          print(selectedDate.date);
                           Navigator.pop(context);
                         },
                       )
@@ -594,10 +729,10 @@ void _switchCalendarView() {
     );
   }
 
-  void showdetailesDialog(CalendarTapDetails selectedDate ) {
-    int id=selectedDate.appointments![0].id;
+  void showdetailesDialog(CalendarTapDetails selectedDate) {
+    int id = selectedDate.appointments![0].id;
     print("insidee $id");
-    CustomEvent e=events.firstWhere((element) => element.id==id);
+    CustomEvent e = events.firstWhere((element) => element.id == id);
     Size size = MediaQuery.of(context).size;
     showDialog(
         context: context,
@@ -605,7 +740,6 @@ void _switchCalendarView() {
           return AlertDialog(
               backgroundColor: primaryLightColor,
               content: Container(
-
                   color: primaryLightColor,
                   width: size.width * 0.5,
                   height: size.height * 0.5,
@@ -619,84 +753,120 @@ void _switchCalendarView() {
                           fontFamily: 'myFont',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          
                         ),
                         textAlign: TextAlign.right,
                       ),
                       SizedBox(
                         height: 20,
                       ),
-                      Text("الطــفــل",style: TextStyle(fontSize:20.0,fontFamily: 'myFont',fontWeight: FontWeight.bold,color: secondaryColor)),
+                      Text("الطــفــل",
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              fontFamily: 'myFont',
+                              fontWeight: FontWeight.bold,
+                              color: secondaryColor)),
                       Container(
                         padding: EdgeInsets.all(10),
-                        width: size.width*0.5,
+                        width: size.width * 0.5,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(
-                            color: primaryColor, // Change this color to your desired border color
+                            color:
+                                primaryColor, // Change this color to your desired border color
                             width: 2.0, // Adjust the width as needed
                           ),
                           borderRadius: BorderRadius.circular(
                               8.0), // Adjust the border radius as needed
                         ),
-                        child: Text( e.child,textAlign: TextAlign.right,
-                          style: TextStyle(fontSize:18.0,fontFamily: 'myFont',color: secondaryColor), // Adjust the font size and other styles as needed
+                        child: Text(
+                          e.child, textAlign: TextAlign.right,
+                          style: TextStyle(
+                              fontSize: 18.0,
+                              fontFamily: 'myFont',
+                              color:
+                                  secondaryColor), // Adjust the font size and other styles as needed
                         ),
-                      ),SizedBox(height:10),
-                      Text("الأخــصــائــيــة",style: TextStyle(fontSize:20.0,fontFamily: 'myFont',fontWeight: FontWeight.bold,color: secondaryColor)),
+                      ),
+                      SizedBox(height: 10),
+                      Text("الأخــصــائــيــة",
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              fontFamily: 'myFont',
+                              fontWeight: FontWeight.bold,
+                              color: secondaryColor)),
                       Container(
                         padding: EdgeInsets.all(10),
-                        width: size.width*0.5,
+                        width: size.width * 0.5,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(
-                            color: primaryColor, // Change this color to your desired border color
+                            color:
+                                primaryColor, // Change this color to your desired border color
                             width: 2.0, // Adjust the width as needed
                           ),
                           borderRadius: BorderRadius.circular(
                               8.0), // Adjust the border radius as needed
                         ),
-                        child: Text( e.specialest,textAlign: TextAlign.right,
-                          style: TextStyle(fontSize:18.0,fontFamily: 'myFont',color: secondaryColor), // Adjust the font size and other styles as needed
+                        child: Text(
+                          e.specialest, textAlign: TextAlign.right,
+                          style: TextStyle(
+                              fontSize: 18.0,
+                              fontFamily: 'myFont',
+                              color:
+                                  secondaryColor), // Adjust the font size and other styles as needed
                         ),
-                      ),SizedBox(height:10),
-                      Text("نـوع الـجـلـسـة",style: TextStyle(fontSize:20.0,fontFamily: 'myFont',fontWeight: FontWeight.bold,color: secondaryColor)),
+                      ),
+                      SizedBox(height: 10),
+                      Text("نـوع الـجـلـسـة",
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              fontFamily: 'myFont',
+                              fontWeight: FontWeight.bold,
+                              color: secondaryColor)),
                       Container(
                         padding: EdgeInsets.all(10),
-                        width: size.width*0.5,
+                        width: size.width * 0.5,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(
-                            color: primaryColor, // Change this color to your desired border color
+                            color:
+                                primaryColor, // Change this color to your desired border color
                             width: 2.0, // Adjust the width as needed
                           ),
                           borderRadius: BorderRadius.circular(
                               8.0), // Adjust the border radius as needed
                         ),
-                        child: Text( e.session,textAlign: TextAlign.right,
-                          style: TextStyle(fontSize:18.0,fontFamily: 'myFont',color: secondaryColor), // Adjust the font size and other styles as needed
+                        child: Text(
+                          e.session, textAlign: TextAlign.right,
+                          style: TextStyle(
+                              fontSize: 18.0,
+                              fontFamily: 'myFont',
+                              color:
+                                  secondaryColor), // Adjust the font size and other styles as needed
                         ),
-                      ),SizedBox(height:17),
-                      RoundedButton(text: "تــعــديــل", press: (){
-                        
-                        Navigator.pop(context);
-                        showEventInputDialog(selectedDate,true);
-                      }),
+                      ),
+                      SizedBox(height: 17),
+                      RoundedButton(
+                          text: "تــعــديــل",
+                          press: () {
+                            Navigator.pop(context);
+                            showEventInputDialog(selectedDate, true);
+                          }),
                     ]);
                   }))));
         });
   }
 
-  void addMoreEvents(List<DateTime>vdates){
+  void addMoreEvents(List<DateTime> vdates) {
     int id;
-    Color  color;
+    Color color;
     Size size = MediaQuery.of(context).size;
     String ch = "";
     String sp = "";
     String ss = "";
-    String h=timeOfDay.hour.toString();
+    String h = timeOfDay.hour.toString();
     String m = timeOfDay.minute.toString();
-    String dd=visibleDatesString.first;
+    String dd = visibleDatesString.first;
     DateTime datedate;
     if (timeOfDay.hour > 12) {
       int hh = timeOfDay.hour;
@@ -766,7 +936,7 @@ void _switchCalendarView() {
                             onChanged: (value) {
                               setState(() {
                                 selectedDateweek = value!;
-                                dd = value! ;
+                                dd = value!;
                               });
                             },
                             buttonStyleData: ButtonStyleData(
@@ -787,7 +957,6 @@ void _switchCalendarView() {
                             menuItemStyleData: const MenuItemStyleData(
                               height: 40,
                             ),
-                            
                           ),
                         ),
                       ),
@@ -802,9 +971,9 @@ void _switchCalendarView() {
                             fontWeight: FontWeight.bold,
                             color: secondaryColor,
                           )),
-                       SizedBox(
+                      SizedBox(
                         height: 5,
-                      ), 
+                      ),
                       Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.only(left: 14, right: 14),
@@ -815,24 +984,31 @@ void _switchCalendarView() {
                             border: Border.all(color: primaryColor, width: 2),
                             color: Colors.white),
                         child: GestureDetector(
-                          child: Text(h+':'+m),
+                          child: Text(h + ':' + m),
                           onTap: () async {
-                            TimeOfDay?newtime= await showTimePicker(
+                            TimeOfDay? newtime = await showTimePicker(
                                 context: context, initialTime: timeOfDay);
-                            if(newtime ==null)return;
-                            setState(() => timeOfDay=newtime,);
-                            setState(() => m=timeOfDay.minute.toString(),);
-                            setState(() => h=timeOfDay.hour.toString());
-                            if(timeOfDay.hour>12){
-                              int hh=timeOfDay.hour;
-                              hh=hh-12;
-                            setState(() => h=hh.toString(),);
+                            if (newtime == null) return;
+                            setState(
+                              () => timeOfDay = newtime,
+                            );
+                            setState(
+                              () => m = timeOfDay.minute.toString(),
+                            );
+                            setState(() => h = timeOfDay.hour.toString());
+                            if (timeOfDay.hour > 12) {
+                              int hh = timeOfDay.hour;
+                              hh = hh - 12;
+                              setState(
+                                () => h = hh.toString(),
+                              );
                             }
-
                           },
                         ),
                       ),
-                      SizedBox(height: 15,),  
+                      SizedBox(
+                        height: 15,
+                      ),
                       Text("الــطــفــل",
                           textAlign: TextAlign.right,
                           style: TextStyle(
@@ -1122,7 +1298,6 @@ void _switchCalendarView() {
                             menuItemStyleData: const MenuItemStyleData(
                               height: 40,
                             ),
-                            
                           ),
                         ),
                       ),
@@ -1134,11 +1309,15 @@ void _switchCalendarView() {
                         press: () {
                           color = colorMap[ss.toLowerCase()]!;
                           autoID++;
-                          id=autoID;
-                          int index=visibleDatesString.indexOf(dd);
-                          datedate=visibleDates[index];
-                          datedate=new DateTime(datedate.year,datedate.month,datedate.day,timeOfDay.hour,timeOfDay.minute);
-                          addEvent(id,datedate,datedate.add(Duration(minutes: 40)),ch,sp,ss,color);
+                          id = autoID;
+                          int index = visibleDatesString.indexOf(dd);
+                          datedate = visibleDates[index];
+                          datedate = new DateTime(datedate.year, datedate.month,
+                              datedate.day, timeOfDay.hour, timeOfDay.minute);
+                          addEvent(
+                              id,datedate,datedate.add(Duration(minutes: 40)),ch,sp,ss, color);
+                          newSession= CustomEvent(id,ch,sp,ss,datedate,datedate.add(Duration(minutes: 40)),color);
+                          addNewSession();
                           print(ch);
                           print(sp);
                           print(ss);
@@ -1155,8 +1334,6 @@ void _switchCalendarView() {
       },
     );
   }
-
-
 }
 
 class CustomEvent {
