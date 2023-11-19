@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:sanad_software_project/addNewChild.dart';
 import 'package:sanad_software_project/auuth/signup.dart';
 import 'package:sanad_software_project/c.dart';
 import 'package:sanad_software_project/calender.dart';
@@ -220,7 +221,10 @@ class _LoginState extends State<Login> {
                     ),
                     ElevatedButton(onPressed:() {
                       Navigator.push(context, MaterialPageRoute(builder: (context){return calenderr();}));
-                    }, child: Text("ggg"))
+                    }, child: Text("ggg")),
+                    ElevatedButton(onPressed:() {
+                      Navigator.push(context, MaterialPageRoute(builder: (context){return newChild();}));
+                    }, child: Text("newChild"))
                    ],
                    
                 )),

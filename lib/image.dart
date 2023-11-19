@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:sanad_software_project/theme.dart';
 
 void main() {
   runApp(MyApp());
@@ -41,16 +42,21 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    final url = Uri.parse('http://your_server_ip:3000/upload'); // Replace with your server's IP
+    final url = Uri.parse(ip+'/sanad/upload'); // Replace with your server's IP
     var request = http.MultipartRequest('POST', url);
+    request.fields['childID'] = "1234567890";
     request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
 
     try {
       var response = await request.send();
       if (response.statusCode == 200) {
         print('Image uploaded successfully');
-      } else {
+      }else if(response.statusCode==201){
+        print(response.stream);
+      }
+       else {
         print('Failed to upload image. Status code: ${response.statusCode}');
+      
       }
     } catch (error) {
       print('Error uploading image: $error');
