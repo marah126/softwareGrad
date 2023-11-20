@@ -1,10 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:calendar_view/calendar_view.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
@@ -12,6 +15,8 @@ import 'package:sanad_software_project/components/roundedTextFeild2.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
+import 'package:http/http.dart' as http;
+
 
 
 class newChild extends StatefulWidget {
@@ -24,11 +29,11 @@ class newChild extends StatefulWidget {
 class _newChildState extends State<newChild> {
 
   static const List<String> sessions = [
-    'الـلغـة و نــطــق',
     'ســلــوكــي',
     'وظــيــفــي',
     'تــربـيـة خـاصـة',
     'عــلاج طــبـيـعي',
+    'الـلغـة و نــطــق',
   ];
   String selectedSession = sessions.first;
   
@@ -116,6 +121,107 @@ File? _file;
       }
     });
   }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  Future<void> addNewchild()async{
+    
+    final List<Map<String, dynamic>> sessionsMap = [];
+
+  for (int i = 0; i < 5; i++) {
+    if (int.parse(sessionsController[i].text) > 0) {
+      Map<String, dynamic> newSession = {
+        'sessionName': sessions[i],
+        'sessionNo': int.parse(sessionsController[i].text),
+      };
+      sessionsMap.add(newSession);
+    }
+  }
+        print(jsonEncode(sessionsMap));
+
+    final response = await http.post(Uri.parse(ip+"/sanad/addChildInfo"),body: {
+      'fname': fnameController.text,
+          'secname':secnameController.text,
+          'thname':thnameController.text,
+          'lname':lnameController.text,
+          'id': idController.text,
+          'birthDate': birthDate,
+          'enteryDate': enteryDate,
+          'firstSessionDate': firstSessionDate,
+          'fatherPhone':fatherPhoneController.text,
+          'motherPhone': motherPhoneController.text,
+          'address': addressController.text,
+          'diagnosis': diagnosisController.text,
+          'sessions':jsonEncode(sessionsMap),
+    });
+
+    if(response.statusCode==200){
+      print("Done");
+    }else{
+      print("error");
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_image == null) {
+      print('No image selected');
+      return;
+    }
+
+    final url = Uri.parse(ip+'/sanad/upload'); // Replace with your server's IP
+    var request = http.MultipartRequest('POST', url);
+    request.fields['childID'] = idController.text;
+    request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
+
+    try {
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        print('Image uploaded successfully');
+      }else if(response.statusCode==201){
+        print(response.stream);
+      }
+       else {
+        print('Failed to upload image. Status code: ${response.statusCode}');
+      
+      }
+    } catch (error) {
+      print('Error uploading image: $error');
+    }
+  }
+
+  Future<void> _uploadFile() async {
+    if (_file == null) {
+      // Handle case where no file is selected
+      return;
+    }
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse(ip+'/sanad/uploadfile'),
+    );
+
+    // Add file to the request
+    request.fields['childID'] = idController.text;
+    request.files.add(
+  await http.MultipartFile.fromPath(
+    'file',
+    _file!.path,
+    contentType: MediaType('application', 'pdf'),
+  ),
+);
+
+
+    // Send the request
+    var response = await request.send();
+
+    // Check the server response
+    if (response.statusCode == 200) {
+      print('File uploaded successfully');
+    } else {
+      print('File upload failed with status ${response.statusCode}');
+    }
+  }
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -622,7 +728,13 @@ File? _file;
                   SizedBox(height: 5,),
                 ],
               ),
-            )
+            ),
+            SizedBox(height: 15,),
+            RoundedButton(text: "حــفــظ", press: (){
+              addNewchild();
+              _uploadImage();
+              _uploadFile();
+            })
           ],
         )),
       ),
