@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
@@ -75,6 +77,9 @@ class _MyCalendarState extends State<calenderr> {
   List<String> visibleDatesString = [];
   late CustomEvent newSession;
 
+   late DateTime firstDayOfNextMonth;
+   late DateTime lastDayOfCurrentMonth;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   
@@ -82,7 +87,7 @@ class _MyCalendarState extends State<calenderr> {
   Future<void> getChildrenNames() async{
     int x=0;
     if (x == 0) {
-      print("childrenssssssssssss");
+      //print("childrenssssssssssss");
       final childreNamesResponse =
           await http.get(Uri.parse(ip + "/sanad/getchname"));
       if (childreNamesResponse.statusCode == 200) {
@@ -91,14 +96,14 @@ class _MyCalendarState extends State<calenderr> {
         final List<dynamic> data = jsonDecode(childreNamesResponse.body);
 
         for (int i = 0; i < data.length; i++) {
-          print(data[i]['Fname'] + " " + data[i]['Lname']);
+         // print(data[i]['Fname'] + " " + data[i]['Lname']);
           childName = data[i]['Fname'] + " " + data[i]['Lname'];
           setState(() {
             children.add(childName);
           });
         }
         for(int i=0;i<children.length;i++){
-          print("ch"+children[i]);
+         // print("ch"+children[i]);
         }
       } else {
         print("errrrrrrrror");
@@ -114,14 +119,14 @@ class _MyCalendarState extends State<calenderr> {
         final List<dynamic> data2 = jsonDecode(specialestNamesResponse.body);
 
         for (int i = 0; i < data2.length; i++) {
-          print(data2[i]['Fname'] + " " + data2[i]['Lname']);
+          //print(data2[i]['Fname'] + " " + data2[i]['Lname']);
           spName = data2[i]['Fname'] + " " + data2[i]['Lname'];
           setState(() {
             specialests.add(spName);
           });
         }
         for(int i=0;i<specialests.length;i++){
-          print("sp"+specialests[i]);
+         // print("sp"+specialests[i]);
         }
       } else {
         print("errrrrrrrror");
@@ -138,7 +143,8 @@ class _MyCalendarState extends State<calenderr> {
           'specialest': newSession.specialest,
           'session': newSession.session,
           'date': newSession.from.toUtc().toIso8601String(),
-          'day': day
+          'endMonth':newSession.endMonth.toUtc().toIso8601String(),
+          'day': ((newSession.from.weekday  == 7) ? 0 : newSession.from.weekday).toString(),
     });
 
     if (response.statusCode == 200) {
@@ -153,6 +159,7 @@ class _MyCalendarState extends State<calenderr> {
 
     CustomEvent e;
     DateTime dd;
+    DateTime endMonth;
     String s;
     final allSessions=await http.get(Uri.parse(ip+"/sanad/getallsessions"));
     if (allSessions.statusCode == 200) {
@@ -163,8 +170,9 @@ class _MyCalendarState extends State<calenderr> {
         for(int i=0;i<data.length;i++){
           print(data[i]);
           dd=DateTime.parse(data[i]['date']).toLocal();
+          endMonth=DateTime.parse(data[i]['endMonth']).toLocal();
           s=data[i]['session'];
-          e=CustomEvent(data[i]['idd'], data[i]['child'], data[i]['specialest'], data[i]['session'], dd, dd.add(Duration(minutes: 40)), colorMap[s.toLowerCase()]!);
+          e=CustomEvent(data[i]['idd'], data[i]['child'], data[i]['specialest'], data[i]['session'], dd, dd.add(Duration(minutes: 40)), endMonth,colorMap[s.toLowerCase()]!);
           events.add(e);
         }
     }
@@ -201,9 +209,9 @@ class _MyCalendarState extends State<calenderr> {
 
   
   void addEvent(int id, DateTime startTime, DateTime endTime, String child,
-      String specialest, String session, Color c) {
+      String specialest, String session, DateTime endMonth,Color c) {
     final newEvent =
-        CustomEvent(id, child, specialest, session, startTime, endTime, c);
+        CustomEvent(id, child, specialest, session, startTime, endTime, endMonth,c);
     events.add(newEvent);
     setState(() {
       // Refresh the calendar with the updated event data
@@ -317,9 +325,9 @@ class _MyCalendarState extends State<calenderr> {
   }
 
   CalendarDataSource _getCalendarAppointments() {
-    DateTime d = DateTime.now();
-    DateTime firstDayOfNextMonth = DateTime(d.year, d.month + 1, 1);
-    DateTime lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
+   // DateTime d = DateTime.now();
+   // DateTime firstDayOfNextMonth = DateTime(d.year, d.month + 1, 1);
+   // DateTime lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
    // d = d.add(const Duration(days: 10));
     final List<Appointment> appointments = <Appointment>[];
 
@@ -330,7 +338,9 @@ class _MyCalendarState extends State<calenderr> {
           endTime: event.to,
           subject: event.child,
           color: event.color,
-          recurrenceRule: 'FREQ=DAILY;INTERVAL=7;UNTIL=$lastDayOfCurrentMonth'));
+          recurrenceRule: 'FREQ=DAILY;INTERVAL=7;UNTIL=${event.endMonth}'));
+
+          print("appointments= "+appointments.length.toString());
     }
     return _DataSource(appointments);
   }
@@ -708,14 +718,16 @@ class _MyCalendarState extends State<calenderr> {
                           }
                           if (flag == false) autoID++;
                           id = autoID;
+                          firstDayOfNextMonth = DateTime(selectedDate.date!.year, selectedDate.date!.month + 1, 1);
+                          lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
                           addEvent(
-                              id,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),ch,sp, ss,color);
-                          newSession= CustomEvent(id,ch,sp,ss,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),color);
+                              id,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),ch,sp, ss,lastDayOfCurrentMonth,color);
+                          newSession= CustomEvent(id,ch,sp,ss,selectedDate.date!,selectedDate.date!.add(Duration(minutes: 40)),lastDayOfCurrentMonth,color);
                           addNewSession();
-                          print(ch);
-                          print(sp);
-                          print(ss);
-                          print(events.length);
+                          // print(ch);
+                          // print(sp);
+                          // print(ss);
+                          print("from reserve button"+events.length.toString());
                           print(selectedDate.date);
                           Navigator.pop(context);
                         },
@@ -1314,9 +1326,12 @@ class _MyCalendarState extends State<calenderr> {
                           datedate = visibleDates[index];
                           datedate = new DateTime(datedate.year, datedate.month,
                               datedate.day, timeOfDay.hour, timeOfDay.minute);
+
+                          firstDayOfNextMonth = DateTime(datedate.year, datedate.month + 1, 1);
+                          lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
                           addEvent(
-                              id,datedate,datedate.add(Duration(minutes: 40)),ch,sp,ss, color);
-                          newSession= CustomEvent(id,ch,sp,ss,datedate,datedate.add(Duration(minutes: 40)),color);
+                              id,datedate,datedate.add(Duration(minutes: 40)),ch,sp,ss, lastDayOfCurrentMonth,color);
+                          newSession= CustomEvent(id,ch,sp,ss,datedate,datedate.add(Duration(minutes: 40)),lastDayOfCurrentMonth,color);
                           addNewSession();
                           print(ch);
                           print(sp);
@@ -1338,13 +1353,14 @@ class _MyCalendarState extends State<calenderr> {
 
 class CustomEvent {
   CustomEvent(this.id, this.child, this.specialest, this.session, this.from,
-      this.to, this.color);
+      this.to, this.endMonth, this.color);
   int id;
   String child;
   String specialest;
   String session;
   DateTime from;
   DateTime to;
+  DateTime endMonth;
   Color color;
 }
 

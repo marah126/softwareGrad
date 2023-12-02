@@ -1,4 +1,6 @@
 
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -32,18 +34,21 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
+  final String imageId = '1234567890'; // Replace with the actual image ID
+  String imageUrl = '';
   late String id;
   late final Map<String,dynamic> ?data ;
-      List<dynamic> ?sessions;
+  List<dynamic> ?sessions;
 
   String name="";
   String fp="";
   String mp="";
   String add="";
   String diag="";
-    DateTime bd=DateTime.now();
-    DateTime ed=DateTime.now();
-    DateTime fsd=DateTime.now();
+
+  DateTime bd=DateTime.now();
+  DateTime ed=DateTime.now();
+  DateTime fsd=DateTime.now();
 
   @override
   void initState() {
@@ -53,6 +58,25 @@ class _DetailsPageState extends State<DetailsPage> {
         });
     print("id"+id);
     getChildInfo();
+    getImageUrl();
+  }
+
+  Future<void> getImageUrl() async {
+    final String serverUrl = ip+'/sanad/getImage/$imageId';
+
+    try {
+      final response = await http.get(Uri.parse(serverUrl));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          imageUrl = serverUrl;
+        });
+      } else {
+        print('Failed to get image. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error getting image: $error');
+    }
   }
 
   Future<void> getChildInfo() async {
@@ -236,10 +260,10 @@ class _DetailsPageState extends State<DetailsPage> {
                     children: <Widget>[
                       Positioned(
                         child: Image.asset(
-                          'assets/images/tester.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                                'assets/images/tester.png',
+                                fit: BoxFit.cover,
+                              ),
+                     ),
                       Center(
                         child: Padding(
                           padding: EdgeInsets.all(20),
@@ -256,12 +280,11 @@ class _DetailsPageState extends State<DetailsPage> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     )),
-                              ),
-                              Image.asset(
-                                'assets/images/child1.png',
-                                width: 300,
-                                height: 300,
-                              ),
+                              ),ClipOval(
+                                child:imageUrl.isNotEmpty? (Image.network(imageUrl, height: 200.0,width: 200.0,fit: BoxFit.cover,)): 
+                                Image.asset('assets/images/child1.png', width: 300, height: 300,) ,
+                              )
+                              
                               //  SizedBox(height: 20),
                             ],
                           ),

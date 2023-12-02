@@ -1,61 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:sanad_software_project/adminPages/DetailsPageOfChildren.dart';
+import 'package:sanad_software_project/adminPages/DetailsPageOfEmployee.dart';
 import 'dart:convert';
 
-import 'package:sanad_software_project/DetailsPageOfChildren.dart';
 import 'package:sanad_software_project/theme.dart';
 
 
 
-void main() {
-  runApp(MyApp());
-}
-
-class Registered_children {
+class Employee {
   final String name;
   final String image;
   final String details;
-
-  Registered_children(
-      {required this.name, required this.image, required this.details});
+  Employee({required this.name, required this.image, required this.details});
 }
 
-class MyApp extends StatelessWidget {
+
+
+class viewSpecialest extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(home: TestPage(), debugShowCheckedModeBanner: false);
-  }
+  viewSpecialestState createState() => viewSpecialestState();
 }
 
-class TestPage extends StatefulWidget {
-  @override
-  _TestPageState createState() => _TestPageState();
-}
+class viewSpecialestState extends State<viewSpecialest> {
+  String id = "";
 
-class _TestPageState extends State<TestPage> {
+  List<String> EMP = [];
+  String img = 'assets/images/person4.png';
+  late final List<dynamic> data;
 
-  String id="";
-  List<String> children = [];
-  String img = 'assets/images/child1.png';
-  late final List<dynamic> data ;
-  Future<void> getChildrenNames() async {
-    print("childrenssssssssssss");
-    final childreNamesResponse =
-        await http.get(Uri.parse(ip + "/sanad/getchname"));
-    if (childreNamesResponse.statusCode == 200) {
-      children.clear();
-      String childName;
-      data = jsonDecode(childreNamesResponse.body);
+  Future<void> getEmployeeName() async {
+    // print("childrenssssssssssss");
+    final EmployeeNamesResponse =
+        await http.get(Uri.parse(ip + "/sanad/getspname"));
+    if (EmployeeNamesResponse.statusCode == 200) {
+      EMP.clear();
+      String EmployeeName;
+      data = jsonDecode(EmployeeNamesResponse.body);
 
       for (int i = 0; i < data.length; i++) {
         print(data[i]['Fname'] + " " + data[i]['Lname']);
-        childName = data[i]['Fname'] + " " + data[i]['Lname'];
+        EmployeeName = data[i]['Fname'] + " " + data[i]['Lname'];
         setState(() {
-          children.add(childName);
+          EMP.add(EmployeeName);
         });
       }
-      for (int i = 0; i < children.length; i++) {
-        print("ch" + children[i]);
+      for (int i = 0; i < EMP.length; i++) {
+        print("ch" + EMP[i]);
       }
     } else {
       print("errrrrrrrror");
@@ -66,20 +57,27 @@ class _TestPageState extends State<TestPage> {
   void initState() {
     super.initState();
 
-    getChildrenNames();
+    getEmployeeName();
+  }
+
+  void _onPressed(BuildContext context, String name) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => spDetailsPage(name: name)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xff6f35a5),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Color(0xff6f35a5),
+      // ),
       drawer: Drawer(),
       body: ListView.builder(
-        itemCount: children.length,
+        itemCount: EMP.length,
         itemBuilder: (context, index) {
-          String registered_child = children[index];
+          String employee = EMP[index];
           return Card(
             margin: EdgeInsets.all(16),
             child: Row(
@@ -90,7 +88,7 @@ class _TestPageState extends State<TestPage> {
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () {
-                        id=data[index]['id'];
+                        id = data[index]['id'];
                         print(index);
                         print(id);
                         _onPressed(context, id);
@@ -106,7 +104,7 @@ class _TestPageState extends State<TestPage> {
                         ),
                       ),
                       child: Text(
-                        "كـافـة الـتـفـاصـيـل",
+                        "رؤيـة كـافـة الـتـفـاصـيـل",
                         style: TextStyle(fontFamily: 'myfont'),
                       ),
                     ),
@@ -114,27 +112,20 @@ class _TestPageState extends State<TestPage> {
                 ),
                 Spacer(),
                 Text(
-                  registered_child,
+                  employee,
                   style: TextStyle(fontSize: 18, fontFamily: 'myfont'),
                 ),
                 Spacer(),
                 Image.asset(
                   img,
-                  width: 80,
-                  height: 80,
+                  width: 60,
+                  height: 60,
                 ),
               ],
             ),
           );
         },
       ),
-    );
-  }
-
-  void _onPressed(BuildContext context, String name) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => DetailsPage(name: name)),
     );
   }
 }

@@ -1,19 +1,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:calendar_view/calendar_view.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:sanad_software_project/components/roundedTextFeild2.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
-import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:http/http.dart' as http;
 
@@ -622,7 +617,7 @@ File? _file;
                     width: 10,
                   ),
                   Container(
-                    width: 250,
+                    width: 200,
                     padding: EdgeInsets.only(bottom: 5),
                     child: RoundedButton(
                       color: primaryColor,
@@ -662,7 +657,7 @@ File? _file;
                         width: 10,
                       ),
                       Container(
-                        width: 250,
+                        width: 200,
                         child: RoundedButton(
                           color: primaryColor,
                           text: "تــحــمــيـل",
@@ -703,7 +698,7 @@ File? _file;
                         width: 10,
                       ),
                       Container(
-                        width: 250,
+                        width: 200,
                         child: RoundedButton(
                           color: primaryColor,
                           text: "تــحــمــيـل",
@@ -734,7 +729,8 @@ File? _file;
               addNewchild();
               _uploadImage();
               _uploadFile();
-            })
+            }),
+            SizedBox(height: 15,)
           ],
         )),
       ),

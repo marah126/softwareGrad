@@ -2,13 +2,17 @@
 
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sanad_software_project/addNewChild.dart';
+import 'package:sanad_software_project/adminPages/addNewChild.dart';
 import 'package:sanad_software_project/auuth/signup.dart';
-import 'package:sanad_software_project/c.dart';
-import 'package:sanad_software_project/calender.dart';
+import 'package:sanad_software_project/adminPages/c.dart';
+import 'package:sanad_software_project/adminPages/calender.dart';
+import 'package:sanad_software_project/adminPages/addNewSpecialest.dart';
+import 'package:sanad_software_project/adminPages/adminHomePage.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
+import 'package:sanad_software_project/specialestPages/homePage.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:http/http.dart' as http;
 
@@ -23,7 +27,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
 
   String result="  ";
-
+  final auth=FirebaseAuth.instance;
   
 
 
@@ -52,6 +56,19 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         print("flutter loged in");
         print(response.body.toString());
+
+        try {
+          final user = auth.signInWithEmailAndPassword(
+              email: emailController.text, password: passwordController.text);
+          if (user != null) {
+            print(user);
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return adminHomePage();
+            }));
+          }
+        } catch (e) {
+          print(e);
+        }
 
       } 
       else {
@@ -191,8 +208,11 @@ class _LoginState extends State<Login> {
                     ),
                     RoundedButton(
                       text: "تـسـجـيـل الــدخــول",
-                      press: ()=>{
-                        loginfun()
+                      press:  ()=>{
+                        loginfun(),
+                        
+                      //  Navigator.push(context, MaterialPageRoute(builder: (context){return adminHomePage();}))
+
                       }),
                     SizedBox(
                       height: 20,
@@ -220,11 +240,35 @@ class _LoginState extends State<Login> {
                       ],
                     ),
                     ElevatedButton(onPressed:() {
-                      Navigator.push(context, MaterialPageRoute(builder: (context){return calenderr();}));
+                      // try{
+                      //   final user=auth.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+                      //   if(user!=null){
+                      //     print(user);
+                      //     Navigator.push(context, MaterialPageRoute(builder: (context){return calenderr();}));
+                      //   }
+                      // }catch(e){
+                      //   print(e);
+                      // }
+                    Navigator.push(context, MaterialPageRoute(builder: (context){return spHomePage(id:emailController.text,name:emailController.text);}));
+
                     }, child: Text("ggg")),
-                    ElevatedButton(onPressed:() {
-                      Navigator.push(context, MaterialPageRoute(builder: (context){return newChild();}));
-                    }, child: Text("newChild"))
+                    // ElevatedButton(onPressed:()async {
+                    //   //Navigator.push(context, MaterialPageRoute(builder: (context){return adminHomePage();}));
+                    //   try{
+                    //     final newUser=await auth.createUserWithEmailAndPassword(
+                    //     email: emailController.text, password: passwordController.text);
+                    //    final user=auth.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+                    //     if(user!=null){
+                    //       print(user);
+                    //       Navigator.push(context, MaterialPageRoute(builder: (context){return calenderr();}));
+                    //     }
+                    //     Navigator.push(context, MaterialPageRoute(builder: (context){return adminHomePage();}));
+                    //   }
+                    //   catch(e){
+                    //     print(e);
+                    //   }
+
+                    // }, child: Text("newChild"))
                    ],
                    
                 )),
