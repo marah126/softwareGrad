@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
+import 'package:sanad_software_project/specialestPages/sessionNotes.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:http/http.dart' as http;
 
@@ -25,20 +26,35 @@ class spHomePageState extends State<spHomePage>{
 
   List<dynamic> data=[] ;
   List<DateTime> date=[];
+  static List <bool> done=[];
+  static int doneSessions=0;
+
   late DateTime d;
+  DateTime now=DateTime.now();
+  late int compare;
+
   @override
   void initState() {
     super.initState();
     setState(()  {
       id = widget.id;
      // name=widget.name;
+      now =now.subtract(Duration(minutes: 30));
       getSPsessionsToday();
+      print("nnnn"+now.toString());
     });
     print("id" + id);
   }
 
   Future<void> getSPsessionsToday()async{
-    //late final Map<String, dynamic>? data;
+    late final Map<String, dynamic>? data2;
+    List<String> spname=name.split(" ");
+    final res = await http.get(
+    Uri.parse(ip + '/sanad/getspId?fname=${spname[0].trim()}&lastName=${spname[1].trim()}'),
+    );
+    data2=jsonDecode(res.body);
+    id=data2!['idd'];
+    print("id"+id);
 
     final response = await http.get(
       Uri.parse(ip + '/sanad/getTODAYSessionsBySP?sp=$name'),
@@ -53,6 +69,7 @@ class spHomePageState extends State<spHomePage>{
           d=DateTime.parse(data[i]['date']).toLocal();
           print(d.toString());
         date.add(d);
+        done.add(true);
         });
         
       }
@@ -110,7 +127,7 @@ class spHomePageState extends State<spHomePage>{
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text("10",style: TextStyle(fontFamily: 'myFont',fontSize: 18,color: secondaryColor,fontWeight: FontWeight.bold)),
+                    Text(doneSessions.toString(),style: TextStyle(fontFamily: 'myFont',fontSize: 18,color: secondaryColor,fontWeight: FontWeight.bold)),
                     SizedBox(width: 20,),
                     Text(": عــدد الـجلـسـات الـمـنـجـزة",style: TextStyle(fontFamily: 'myFont',fontSize: 20,color: secondaryColor,fontWeight: FontWeight.bold)),
                     SizedBox(width: 5,),
@@ -163,7 +180,10 @@ class spHomePageState extends State<spHomePage>{
                                 ]),
                                 SizedBox(height: 5,),
                                 GestureDetector(
-                                  onTap: () {showDialogg(context, index);},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context, MaterialPageRoute(builder: (context){
+                                        return sessionNotes(id: id,name: data[index]['child'],session: data[index]['session'],date: DateTime.parse(data[index]['date']).toLocal(),index: index,);}));},
                                   child: Text("تــوثــيــق",style: TextStyle(
                                     fontFamily: 'myFont',
                                     fontSize: 16.0,
@@ -179,8 +199,9 @@ class spHomePageState extends State<spHomePage>{
                           borderRadius: BorderRadius.circular(30.0),
                         ),
                       ),
-                      SizedBox(width: 10,),
-                      Icon(Icons.done_all,color: const Color.fromARGB(255, 137, 218, 140),size: size.width*0.1),
+                      SizedBox(width: 10,), 
+                      Icon( now.compareTo(date[index])<  0 ? Icons.sync :
+                        done[index]? Icons.done_all : Icons.highlight_off,color: now.compareTo(date[index]) < 0 ? const Color.fromARGB(255, 141, 195, 221) : done[index]? const Color.fromARGB(255, 144, 222, 147): const Color.fromARGB(255, 207, 142, 137),size: size.width*0.1),
                         
                     ]);
                   }
