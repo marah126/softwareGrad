@@ -6,7 +6,7 @@ import 'package:sanad_software_project/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  //const ChatScreen({Key? key}) : super(key: key);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -19,7 +19,7 @@ class _ChatScreenState extends State<ChatScreen> {
   late User? user;
 
   TextEditingController messageText= TextEditingController();
-
+  final ScrollController _scrollController = ScrollController();
   void getUser(){
     try{
         final currentUser = auth.currentUser;
@@ -99,6 +99,7 @@ class _ChatScreenState extends State<ChatScreen> {
               }
               return Expanded(child:
                ListView(
+                controller: _scrollController,
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                 children: messageWidget,));
             }),
@@ -136,6 +137,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         'time':FieldValue.serverTimestamp(),
                       });
                       messageText.clear();
+                      _scrollController.animateTo(duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,_scrollController.position.maxScrollExtent);
                     },
                     child: Text(
                       'send',
@@ -172,7 +175,7 @@ class messageContainer extends StatelessWidget{
       child: Column(
         crossAxisAlignment: isME! ? CrossAxisAlignment.end :CrossAxisAlignment.start, 
         children: [
-        Text('$sender'),
+        Text(isME! ? "You": '$sender'),
         Material(
           elevation: 5,
             borderRadius: isME! ?

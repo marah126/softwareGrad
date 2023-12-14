@@ -9,14 +9,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  Platform.isAndroid?await Firebase.initializeApp(
+  //Platform.isAndroid?
+  await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: "AIzaSyA1XhBrh9-8S5fSuQr0Ku2r17pTjoGWGJ0",
       appId: "1:349745230853:android:18b77afe31ff4b59c1986c",
       messagingSenderId: "349745230853",
       projectId: "sanadd-870c8",
     ),
-  ):
+  );//:
   await Firebase.initializeApp();
   runApp( MyApp());
 }

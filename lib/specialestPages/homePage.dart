@@ -200,8 +200,9 @@ class spHomePageState extends State<spHomePage>{
                         ),
                       ),
                       SizedBox(width: 10,), 
-                      Icon( now.compareTo(date[index])<  0 ? Icons.sync :
-                        done[index]? Icons.done_all : Icons.highlight_off,color: now.compareTo(date[index]) < 0 ? const Color.fromARGB(255, 141, 195, 221) : done[index]? const Color.fromARGB(255, 144, 222, 147): const Color.fromARGB(255, 207, 142, 137),size: size.width*0.1),
+                      Icon( (now.hour< date[index].hour) || (now.hour == date[index].hour && now.minute < date[index].minute)  ? Icons.sync :
+                        done[index]? Icons.done_all : Icons.highlight_off,
+                        color: (now.hour< date[index].hour) || (now.hour == date[index].hour && now.minute < date[index].minute) ? const Color.fromARGB(255, 141, 195, 221) : done[index]? const Color.fromARGB(255, 144, 222, 147): const Color.fromARGB(255, 207, 142, 137),size: size.width*0.1),
                         
                     ]);
                   }

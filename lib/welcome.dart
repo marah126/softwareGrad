@@ -11,7 +11,7 @@ class welcome extends StatelessWidget{
    return Scaffold(
     body: Container(
       height: size.height,
-      width: double.infinity,
+      width: size.width,
       child: Stack(children: [
         Positioned(
           top: 0 ,

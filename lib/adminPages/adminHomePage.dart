@@ -11,6 +11,7 @@ import 'package:sanad_software_project/adminPages/c.dart';
 import 'package:sanad_software_project/adminPages/chat.dart';
 import 'package:sanad_software_project/adminPages/showAllChildren.dart';
 import 'package:sanad_software_project/adminPages/showAllEmployee.dart';
+import 'package:sanad_software_project/adminPages/viewemployeeToChat.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:http/http.dart' as http;
@@ -329,7 +330,7 @@ class _adminHomePageState extends State<adminHomePage> {
           IconButton(
             icon: Icon(Icons.message),
             onPressed: () {
-               Navigator.push(context, MaterialPageRoute(builder: (context){return ChatScreen();}));
+               Navigator.push(context, MaterialPageRoute(builder: (context){return chat();}));
             },
           ),
          ],

@@ -11,6 +11,8 @@ import 'package:sanad_software_project/adminPages/c.dart';
 import 'package:sanad_software_project/adminPages/chat.dart';
 import 'package:sanad_software_project/adminPages/showAllChildren.dart';
 import 'package:sanad_software_project/adminPages/showAllEmployee.dart';
+import 'package:sanad_software_project/specialestPages/empPersonalInformation.dart';
+import 'package:sanad_software_project/specialestPages/empVications.dart';
 import 'package:sanad_software_project/specialestPages/homePage.dart';
 import 'package:sanad_software_project/specialestPages/viewChildren.dart';
 import 'package:sanad_software_project/theme.dart';
@@ -77,7 +79,7 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
                     ),
                   ),
                   Text(
-                    "الـإدارة",
+                    "فطوم دريني",
                     style: TextStyle(color: Colors.white, fontSize: 24,fontFamily: 'myFont'),
                   ),
                   Text(
@@ -170,7 +172,7 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
                   child: TextButton(
                     onPressed: () {
                       setState(() {
-                        container=viewChildren();
+                        container=profile();
                       });
                     },
                     style: TextButton.styleFrom(
@@ -183,7 +185,7 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          "الأطـــفـــال",
+                          "الـصـفـحـة الـشـخـصـيـة",
                           style: TextStyle(
                             color: primaryColor,
                             fontFamily: 'myFont',
@@ -207,7 +209,7 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
                   child: TextButton(
                     onPressed: () {
                       setState(() {
-                        container=viewSpecialest();
+                        container=vv();
                       });
                     },
                     style: TextButton.styleFrom(
@@ -220,7 +222,7 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          "الأخــصــائــيـيـن",
+                          "الإجـــازات",
                           style: TextStyle(
                             color: primaryColor,
                             fontFamily: 'myFont',
@@ -238,79 +240,7 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
                   ),
                 ),
                 SizedBox(height: 5,),
-                Container(
-                width: size.width,
-                height: size.width * 0.2,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        container=newChild();
-                      });
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: primaryColor,
-                        padding: EdgeInsets.all(10),
-                        backgroundColor: hoveredColor,
-                        elevation: 3,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "إضـافـة طــفـل جـديـد",
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontFamily: 'myFont',
-                            fontSize: 20,
-                          ),
-                        ),SizedBox(
-                            width: 8),
-                        Icon(
-                          Icons.face_retouching_natural, // Replace with the desired icon
-                          color: primaryColor, // Set the color of the icon
-                        ),
-                        SizedBox(width: 30,),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 5,),
-                Container(
-                width: size.width,
-                height: size.width * 0.2,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        container=newSpecialest();
-                      });
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: primaryColor,
-                        padding: EdgeInsets.all(10),
-                        backgroundColor: hoveredColor,
-                        elevation: 3,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "إضـافـة أخـصـائـي جـديـد",
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontFamily: 'myFont',
-                            fontSize: 20,
-                          ),
-                        ),SizedBox(
-                            width: 8),
-                        Icon(
-                          Icons.person_add, // Replace with the desired icon
-                          color: primaryColor, // Set the color of the icon
-                        ),
-                        SizedBox(width: 30,),
-                      ],
-                    ),
-                  ),
-                ),
+                
             ]),
           ),
         ),
