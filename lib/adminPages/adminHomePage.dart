@@ -9,6 +9,7 @@ import 'package:sanad_software_project/adminPages/addNewSpecialest.dart';
 import 'package:sanad_software_project/adminPages/adminHome.dart';
 import 'package:sanad_software_project/adminPages/c.dart';
 import 'package:sanad_software_project/adminPages/chat.dart';
+import 'package:sanad_software_project/adminPages/dailyScheduale.dart';
 import 'package:sanad_software_project/adminPages/showAllChildren.dart';
 import 'package:sanad_software_project/adminPages/showAllEmployee.dart';
 import 'package:sanad_software_project/adminPages/viewemployeeToChat.dart';
@@ -310,6 +311,43 @@ class _adminHomePageState extends State<adminHomePage> {
                     ),
                   ),
                 ),
+                SizedBox(height: 5,),
+                Container(
+                width: size.width,
+                height: size.width * 0.2,
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        container=dailySchedual();
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: primaryColor,
+                        padding: EdgeInsets.all(10),
+                        backgroundColor: hoveredColor,
+                        elevation: 3,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          "إضـافـة",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontFamily: 'myFont',
+                            fontSize: 20,
+                          ),
+                        ),SizedBox(
+                            width: 8),
+                        Icon(
+                          Icons.person_add, // Replace with the desired icon
+                          color: primaryColor, // Set the color of the icon
+                        ),
+                        SizedBox(width: 30,),
+                      ],
+                    ),
+                  ),
+                ),
             ]),
           ),
         ),
@@ -328,7 +366,7 @@ class _adminHomePageState extends State<adminHomePage> {
           }
          ),
           IconButton(
-            icon: Icon(Icons.message),
+            icon: Icon(Icons.wechat),
             onPressed: () {
                Navigator.push(context, MaterialPageRoute(builder: (context){return chat();}));
             },

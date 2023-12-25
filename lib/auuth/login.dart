@@ -34,6 +34,8 @@ class _LoginState extends State<Login> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+    bool _obscureText = true;
+
 
   Future<void> loginfun() async {
     print("inside login func");
@@ -158,7 +160,7 @@ class _LoginState extends State<Login> {
                     )),
                     RoundedTextField(
                         child: TextField(
-                      obscureText: true,
+                      obscureText: _obscureText,
                       textAlign: TextAlign.right,
                       controller: passwordController,
                       onChanged: (value){
@@ -173,10 +175,22 @@ class _LoginState extends State<Login> {
                           Icons.lock,
                           color: primaryColor,
                         ),
-                        icon: Icon(
-                          Icons.visibility,
-                          color: primaryColor,
-                        ),
+                        icon: Material(
+                                type: MaterialType.transparency,
+                                child: IconButton(
+                                  icon: Icon(
+                                    _obscureText
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                        color: Colors.grey,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                ),
+                              ),
                         border: InputBorder.none,
                       ),
                     )),

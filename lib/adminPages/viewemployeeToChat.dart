@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanad_software_project/adminPages/chat.dart';
 import 'package:http/http.dart' as http;
+import 'package:sanad_software_project/theme.dart';
 
 // void main() {
 //   runApp(MyApp());
@@ -73,16 +74,18 @@ class _TestPageState extends State<chat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: primaryLightColor,
       appBar: AppBar(
         backgroundColor: Color(0xff6f35a5),
         title: Text('الـدردشـات',style: TextStyle(fontFamily: 'myfont'),),
       ),
       
       body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 4),
         scrollDirection: Axis.vertical,
         child: Column(
           children: <Widget>[
-           SizedBox(height: 20,child: Container( color: Color.fromARGB(255, 237, 234, 240))),
+           SizedBox(height: 20),
            
             ListView.builder(
               shrinkWrap: true,
@@ -108,12 +111,12 @@ class _TestPageState extends State<chat> {
                         children: <Widget>[
                           Text(
                             Freinds[index]['date'] ?? '',
-                            style: TextStyle(),
+                            style: TextStyle(fontFamily: 'myFont',fontSize: 16),
                           ),
                           Spacer(),
-                          Card(
-                            color: Color.fromARGB(255, 237, 234, 240),
-                            child: Column(
+                          
+                            
+                             Column(
                               children: <Widget>[
                                 Text(
                             Freinds[index]['name'] ?? '',
@@ -130,7 +133,7 @@ class _TestPageState extends State<chat> {
                                 ),
                               ],
                             ),
-                          ),
+                          
                           //  Spacer(),
                           Image.asset(
                             Freinds[index]['image'] ?? '',
@@ -140,13 +143,7 @@ class _TestPageState extends State<chat> {
                         ],
                       ),
                     ),
-                    Divider(
-                      height: 1.0,
-                      thickness: 1.0,
-                      color: Color(0xff6f35a5),
-                      indent: 0.0, // Set the starting padding
-                      endIndent: 60.0, // Set the ending padding
-                    ),
+                    
                   ],
 
                 ),
