@@ -28,6 +28,8 @@ class viewSpecialestState extends State<viewSpecialest> {
   List<String> EMP = [];
   String img = 'assets/images/person4.png';
   late final List<dynamic> data;
+  List<String> imagePath = [];
+  List<String> imageID = [];
 
   Future<void> getEmployeeName() async {
     // print("childrenssssssssssss");
@@ -53,11 +55,31 @@ class viewSpecialestState extends State<viewSpecialest> {
     }
   }
 
+  Future<void> getSPImages()async{
+    String path;
+    String id;
+    final images = await http.get(Uri.parse(ip+"/sanad/getAllSPImages"));
+    if(images.statusCode==200){
+      print(images.body);
+    final List<dynamic> image = jsonDecode(images.body);
+      for(int i=0;i<image.length;i++){
+        path=image[i]['path'];
+        id=image[i]['spID'];
+        print(path);
+        print(id);
+        imagePath.add(path);
+        imageID.add(id);
+      }
+      
+    }
+  }
+
   @override
   void initState() {
     super.initState();
 
     getEmployeeName();
+    getSPImages();
   }
 
   void _onPressed(BuildContext context, String name) {
@@ -70,10 +92,13 @@ class viewSpecialestState extends State<viewSpecialest> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Color(0xff6f35a5),
-      // ),
-      drawer: Drawer(),
+      appBar: AppBar(
+        backgroundColor: Color(0xff6f35a5),
+        automaticallyImplyLeading: false,
+        title: Text("الأخــــصـــائـــيـــــيـــــن",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+        centerTitle: true,
+      ),
+      
       body: ListView.builder(
         itemCount: EMP.length,
         itemBuilder: (context, index) {
@@ -116,11 +141,14 @@ class viewSpecialestState extends State<viewSpecialest> {
                   style: TextStyle(fontSize: 18, fontFamily: 'myfont'),
                 ),
                 Spacer(),
-                Image.asset(
-                  img,
-                  width: 60,
+                ClipOval(
+                   child: imageID.contains(data[index]['id'])? 
+                   Image.network('http://192.168.1.19:3000/sanad/getSPImage?id=${imageID[imageID.indexOf(data[index]['id'])]}',
+                  width: 70,
                   height: 60,
-                ),
+                  fit: BoxFit.cover,)
+                  :Image.asset('assets/images/profileImage.jpg', width: 70, height: 60,fit: BoxFit.cover,),
+                 ),
               ],
             ),
           );

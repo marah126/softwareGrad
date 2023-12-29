@@ -354,6 +354,8 @@ class _adminHomePageState extends State<adminHomePage> {
       ),
       appBar: AppBar(
         backgroundColor: primaryColor,
+        automaticallyImplyLeading: false,
+
         actions: [
          Builder(
           builder: (BuildContext context) {

@@ -34,8 +34,10 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
-  final String imageId = '1234567890'; // Replace with the actual image ID
+  final String imageId = '147852369'; // Replace with the actual image ID
   String imageUrl = '';
+  String imageID = '';
+
   late String id;
   late final Map<String,dynamic> ?data ;
   List<dynamic> ?sessions;
@@ -59,17 +61,40 @@ class _DetailsPageState extends State<DetailsPage> {
     print("id"+id);
     getChildInfo();
     getImageUrl();
+    getIDImage();
   }
 
   Future<void> getImageUrl() async {
-    final String serverUrl = ip+'/sanad/getImage/$imageId';
+    print(imageId);
+    final String serverUrl = '$ip/sanad/getImage?id=$id';
 
     try {
       final response = await http.get(Uri.parse(serverUrl));
-
+      print(response.body);
       if (response.statusCode == 200) {
         setState(() {
           imageUrl = serverUrl;
+          print("personal"+imageUrl);
+        });
+      } else {
+        print('Failed to get image. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error getting image: $error');
+    }
+  }
+
+  Future<void> getIDImage() async {
+    print(imageId);
+    final String serverUrl = '$ip/sanad/getIDImageChild?id=$id';
+
+    try {
+      final response = await http.get(Uri.parse(serverUrl));
+      print(response.body);
+      if (response.statusCode == 200) {
+        setState(() {
+          imageID = serverUrl;
+          print("image id"+imageID);
         });
       } else {
         print('Failed to get image. Status code: ${response.statusCode}');
@@ -87,7 +112,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
     if (response.statusCode == 200) {
       print("okkk");
-      print(response.body);
+      //print(response.body);
       data = jsonDecode(response.body);
       setState(() {
         name=data!['firstName']+" "+data!['secondName']+" "+data!['thirdName']+" "+data!['lastName'];
@@ -235,7 +260,36 @@ class _DetailsPageState extends State<DetailsPage> {
         });
   }
 
-// ... existing code ...
+
+void _showImageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          icon: imageID.isEmpty?Icon(Icons.error):Icon(Icons.done),
+          title: Text('صــورة الـــهــويــة',style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20)),
+          content: imageID.isEmpty?Text("لــم يــتــم تــحــمــيــل صــورة الــهويــة",
+            style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20,color: primaryColor),)
+          :Image.network(
+            imageID,
+            width: 200.0, 
+            height: 200.0, 
+            fit: BoxFit.cover),
+          actions: [
+            TextButton(
+              
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('إغلاق',style: TextStyle(fontFamily: 'myFont',fontSize: 18,color: primaryColor)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +336,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                     )),
                               ),ClipOval(
                                 child:imageUrl.isNotEmpty? (Image.network(imageUrl, height: 200.0,width: 200.0,fit: BoxFit.cover,)): 
-                                Image.asset('assets/images/child1.png', width: 300, height: 300,) ,
+                                Image.asset('assets/images/profileImage.jpg', width: 200, height: 200,fit: BoxFit.cover,) ,
                               )
                               
                               //  SizedBox(height: 20),
@@ -506,7 +560,8 @@ class _DetailsPageState extends State<DetailsPage> {
                                 children: <Widget>[
                                   ElevatedButton(
                                     onPressed: () {
-                                      openphoto(context, 'assets/images/id.jpg');
+                                     // openphoto(context, 'assets/images/id.jpg');
+                                     _showImageDialog(context);
                                       print('okkkkkk');
                                     },
                                     style: ButtonStyle(
