@@ -43,17 +43,17 @@ class spHomePageState extends State<spHomePage>{
       getSPsessionsToday();
       print("nnnn"+now.toString());
     });
-    print("id" + id);
+    print("home page id" + id);
   }
 
   Future<void> getSPsessionsToday()async{
     late final Map<String, dynamic>? data2;
     List<String> spname=name.split(" ");
-    final res = await http.get(
-    Uri.parse(ip + '/sanad/getspId?fname=${spname[0].trim()}&lastName=${spname[1].trim()}'),
-    );
-    data2=jsonDecode(res.body);
-    id=data2!['idd'];
+    // final res = await http.get(
+    // Uri.parse(ip + '/sanad/getspId?fname=${spname[0].trim()}&lastName=${spname[1].trim()}'),
+    // );
+    // data2=jsonDecode(res.body);
+   // id=data2!['idd'];
     print("id"+id);
 
     final response = await http.get(

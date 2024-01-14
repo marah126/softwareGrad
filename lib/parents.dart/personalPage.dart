@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings
+// ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings, prefer_const_literals_to_create_immutables
 
 import 'dart:convert';
 
@@ -9,15 +9,14 @@ import 'package:sanad_software_project/theme.dart';
 //import 'package:software/parentPages/completeChildProfile.dart';
 import 'package:http/http.dart' as http;
 
-class profile extends StatefulWidget {
+class profileChild extends StatefulWidget {
   final String id;
 
-  const profile({super.key, required this.id});
+  const profileChild({super.key, required this.id});
   @override
-  profileState createState() => profileState();
+  profileChildState createState() => profileChildState();
 }
-
-class profileState extends State<profile> {
+class profileChildState extends State<profileChild> {
   late String id;
 
   TextEditingController nameController = TextEditingController();
@@ -88,7 +87,7 @@ class profileState extends State<profile> {
   void initState() {
     super.initState();
     id = widget.id;
-    print("spinfo id " + id);
+    print("child info id " + id);
     getImageUrl();
     getspinfo();
   }
@@ -189,48 +188,6 @@ class profileState extends State<profile> {
                                   children: [
                                     Expanded(
                                       child: TextField(
-                                        controller: phoneController,
-                                        enabled: _isTextFieldEnabled,
-                                        onTap: () {
-                                          if (!_isTextFieldEnabled) {
-                                            phoneController.clear();
-                                          }
-                                        },
-                                        onChanged: (text) {
-                                          setState(() {
-                                            phone = phoneController.text;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          labelText: phone,
-                                          labelStyle: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 20.0,
-                                            fontFamily: 'myfont',
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      ' رقم الهاتف',
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontFamily: 'myfont',
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(width: 5),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 16.0,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
                                         controller: emailController,
                                         enabled: _isTextFieldEnabled,
                                         onTap: () {
@@ -299,6 +256,93 @@ class profileState extends State<profile> {
                                 SizedBox(
                                   height: 16.0,
                                 ),
+                                SizedBox(
+                                  height: 16.0,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: phoneController,
+                                        enabled: _isTextFieldEnabled,
+                                        onTap: () {
+                                          if (!_isTextFieldEnabled) {
+                                            phoneController.clear();
+                                          }
+                                        },
+                                        onChanged: (text) {
+                                          setState(() {
+                                            phone = phoneController.text;
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: phone,
+                                          labelStyle: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20.0,
+                                            fontFamily: 'myfont',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      ' رقم هــاــف الأب',
+                                      textAlign: TextAlign.end,
+                                      style: TextStyle(
+                                        fontFamily: 'myfont',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 5),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 16.0,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: phoneController,
+                                        enabled: _isTextFieldEnabled,
+                                        onTap: () {
+                                          if (!_isTextFieldEnabled) {
+                                            phoneController.clear();
+                                          }
+                                        },
+                                        onChanged: (text) {
+                                          setState(() {
+                                            phone = phoneController.text;
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: phone,
+                                          labelStyle: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20.0,
+                                            fontFamily: 'myfont',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      ' رقم هــاتــف الأم',
+                                      textAlign: TextAlign.end,
+                                      style: TextStyle(
+                                        fontFamily: 'myfont',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 5),
+                                  ],
+                                ),
+                                 SizedBox(
+                                  height: 16.0,
+                                ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -316,7 +360,7 @@ class profileState extends State<profile> {
                                       ),
                                     ),
                                     Text(
-                                      '  تـاريـخ بـدايـة الـعـمـل',
+                                      '  تـاريـخ الـميـلاد',
                                       textAlign: TextAlign.end,
                                       style: TextStyle(
                                         fontFamily: 'myfont',
@@ -337,7 +381,7 @@ class profileState extends State<profile> {
                                       child: TextField(
                                         enabled: false,
                                         decoration: InputDecoration(
-                                          labelText: sp,
+                                          labelText: startDate,
                                           labelStyle: TextStyle(
                                             color: Colors.black,
                                             fontSize: 20.0,
@@ -347,7 +391,38 @@ class profileState extends State<profile> {
                                       ),
                                     ),
                                     Text(
-                                      '  أخـصـائـي',
+                                      '  تـاريـخ الـدخـول',
+                                      textAlign: TextAlign.end,
+                                      style: TextStyle(
+                                        fontFamily: 'myfont',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 5),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 16.0,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        enabled: false,
+                                        decoration: InputDecoration(
+                                          labelText: "متلازمة داون",
+                                          labelStyle: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20.0,
+                                            fontFamily: 'myfont',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '  الــتــشـخـيـص',
                                       textAlign: TextAlign.end,
                                       style: TextStyle(
                                         fontFamily: 'myfont',

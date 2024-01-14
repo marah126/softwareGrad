@@ -301,6 +301,7 @@ void _showImageDialog(BuildContext context) {
           'تـفــاصـيـل',
           style: TextStyle(fontFamily: 'myfont'),
         ),
+        centerTitle: true,
       ),
       body: Container(
         width: size.width,

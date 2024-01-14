@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
 import 'dart:convert';
 
@@ -12,6 +12,8 @@ import 'package:sanad_software_project/adminPages/addNewSpecialest.dart';
 import 'package:sanad_software_project/adminPages/adminHomePage.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/components/rounded_textField.dart';
+import 'package:sanad_software_project/parents.dart/homePageParent.dart';
+import 'package:sanad_software_project/parents.dart/parentsDrawer.dart';
 import 'package:sanad_software_project/specialestPages/homeDrawe.dart';
 import 'package:sanad_software_project/specialestPages/homePage.dart';
 import 'package:sanad_software_project/theme.dart';
@@ -28,6 +30,9 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
 
   String result="  ";
+  String type="";
+  String id="";
+  String email="";
   final auth=FirebaseAuth.instance;
   
 
@@ -58,16 +63,35 @@ class _LoginState extends State<Login> {
       });
       if (response.statusCode == 200) {
         print("flutter loged in");
-        print(response.body.toString());
-
-        try {
+        final res =jsonDecode(response.body);
+        print("res body "+res.toString());
+        type=res[0]['type'];
+        id=res[0]['cid'];
+        email=res[0]['email'];
+        print("email "+email);
+        print("id"+id);
+        print("type "+type);
+          try {
           final user = auth.signInWithEmailAndPassword(
-              email: emailController.text, password: passwordController.text);
+              email: email, password: passwordController.text);
           if (user != null) {
             print(user);
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return adminHomePage();
-            }));
+            if(type=="SP"){
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                return spHomeDrawer(id:id);
+              }));
+            }
+            else if(type=="child"){
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                return adminHomePage();
+              }));
+            }
+            else{
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                return adminHomePage();
+              }));
+            }
+            
           }
         } catch (e) {
           print(e);
@@ -254,36 +278,14 @@ class _LoginState extends State<Login> {
                                 color: primaryColor)),
                       ],
                     ),
-                    ElevatedButton(onPressed:() {
-                      // try{
-                      //   final user=auth.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
-                      //   if(user!=null){
-                      //     print(user);
-                      //     Navigator.push(context, MaterialPageRoute(builder: (context){return calenderr();}));
-                      //   }
-                      // }catch(e){
-                      //   print(e);
-                      // }
-                    Navigator.push(context, MaterialPageRoute(builder: (context){return spHomeDrawer();}));
-
-                    }, child: Text("ggg")),
-                    // ElevatedButton(onPressed:()async {
-                    //   //Navigator.push(context, MaterialPageRoute(builder: (context){return adminHomePage();}));
-                    //   try{
-                    //     final newUser=await auth.createUserWithEmailAndPassword(
-                    //     email: emailController.text, password: passwordController.text);
-                    //    final user=auth.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
-                    //     if(user!=null){
-                    //       print(user);
-                    //       Navigator.push(context, MaterialPageRoute(builder: (context){return calenderr();}));
-                    //     }
-                    //     Navigator.push(context, MaterialPageRoute(builder: (context){return adminHomePage();}));
-                    //   }
-                    //   catch(e){
-                    //     print(e);
-                    //   }
-
-                    // }, child: Text("newChild"))
+                    ElevatedButton(
+                      onPressed:() {
+                      Navigator.push(context, MaterialPageRoute(builder: (context){return spHomeDrawer(id:"5");}));}, 
+                    child: Text("sp")),
+                  ElevatedButton(
+                      onPressed:() {
+                      Navigator.push(context, MaterialPageRoute(builder: (context){return parentHomeDrawer(id: "1234567890",);}));}, 
+                    child: Text("child")),
                    ],
                    
                 )),

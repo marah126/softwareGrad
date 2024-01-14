@@ -9,6 +9,9 @@ import 'package:http/http.dart' as http;
 
 
 class myChildren extends StatefulWidget{
+  final String id;
+
+  const myChildren({super.key, required this.id});
   @override
   State<StatefulWidget> createState() {
     return myChildrenState();
@@ -16,7 +19,8 @@ class myChildren extends StatefulWidget{
 }
 
 class myChildrenState extends State<myChildren>{
-  String name ="فطوم دريني";
+  late String id;
+  String name ="";
   List<String>children=[];
   late final List<dynamic> data ;
 
@@ -41,8 +45,8 @@ class myChildrenState extends State<myChildren>{
 }
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    id=widget.id;
     getChildren();
   }
 

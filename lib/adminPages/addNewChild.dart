@@ -7,10 +7,10 @@ import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 import 'package:sanad_software_project/components/roundedTextFeild2.dart';
 import 'package:sanad_software_project/components/rounded_button.dart';
 import 'package:sanad_software_project/theme.dart';
-import 'package:http/http.dart' as http;
 
 
 
@@ -35,6 +35,11 @@ class _newChildState extends State<newChild> {
   String birthDate="select Date";
   String enteryDate="select Date";
   String firstSessionDate="select Date";
+
+  bool checked=false;
+  bool date1=false;
+  bool date2=false;
+  bool date3=false;
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   DateTime selectedDate1 = DateTime.now();
   DateTime selectedDate2 = DateTime.now();
@@ -64,14 +69,17 @@ class _newChildState extends State<newChild> {
         switch (pickerNumber) {
           case 1:
             selectedDate1 = picked;
+            date1=true;
             birthDate=DateFormat('yyyy/MM/dd').format(selectedDate1.toLocal());
             break;
           case 2:
             selectedDate2 = picked;
+            date2=true;
             enteryDate=DateFormat('yyyy/MM/dd').format(selectedDate2.toLocal());
             break;
           case 3:
             selectedDate3 = picked;
+            date3=true;
             firstSessionDate=DateFormat('yyyy/MM/dd').format(selectedDate3.toLocal());
             break;
         }
@@ -92,31 +100,6 @@ final List<TextEditingController> sessionsController =
       List.generate(5, (index) => TextEditingController());
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-File? _image;
-
-  Future<void> _getImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-        print(pickedFile.path);
-      });
-    }
-  }
-File? _file;
-
-  Future<void> _getFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    setState(() {
-      if (result != null) {
-        _file = File(result.files.single.path!);
-      }
-    });
-  }
-
   /////////////////////////////////////////////////////////////////////////////////////////////////
   
   Future<void> addNewchild()async{
@@ -152,70 +135,72 @@ File? _file;
 
     if(response.statusCode==200){
       print("Done");
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("نــجــاح",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.done,color: Colors.green,),
+          content: Text("تــم إضــافــة أخــصــائـي جــديــد بــنــجــاح",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
     }else{
       print("error");
     }
   }
 
-  Future<void> _uploadImage() async {
-    if (_image == null) {
-      print('No image selected');
-      return;
+void check(BuildContext context){
+  if(fnameController.text.trim().isEmpty ||
+    secnameController.text.trim().isEmpty || 
+    thnameController.text.trim().isEmpty || 
+    lnameController.text.trim().isEmpty || 
+    idController.text.trim().isEmpty || 
+    fatherPhoneController.text.trim().isEmpty || 
+    motherPhoneController.text.trim().isEmpty || 
+    addressController.text.trim().isEmpty ||  
+    diagnosisController.text.trim().isEmpty ||
+    date1==false || date2== false || date3==false){
+
+      checked=false;
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("تــحــذيــر",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.error,color: Colors.red,),
+          content: Text("يــجــب تــعــبــئــة جــمــيــع الــحــقـــول",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
+    }
+    else if(idController.text.length!=9){
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("تــحــذيــر",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.error,color: Colors.red,),
+          content: Text("رقــم الــهويــة يــجــب ان يــكــون 9 أرقــام",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
+    }
+    else if (fatherPhoneController.text.length <10 || motherPhoneController.text.length<10){
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("تــحــذيــر",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.error,color: Colors.red,),
+          content: Text("رقــم الهــاتــف أقــل مـــن 10 خــانــات",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
+    }
+      else{
+      checked=true;
     }
 
-    final url = Uri.parse(ip+'/sanad/upload'); // Replace with your server's IP
-    var request = http.MultipartRequest('POST', url);
-    request.fields['childID'] = idController.text;
-    request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
-
-    try {
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        print('Image uploaded successfully');
-      }else if(response.statusCode==201){
-        print(response.stream);
+    for (int i = 0; i < 5; i++) {
+    if ((sessionsController[i].text.trim().isEmpty)) {
+      sessionsController[i].text="0";        
       }
-       else {
-        print('Failed to upload image. Status code: ${response.statusCode}');
-      
-      }
-    } catch (error) {
-      print('Error uploading image: $error');
     }
+
   }
+  
 
-  Future<void> _uploadFile() async {
-    if (_file == null) {
-      // Handle case where no file is selected
-      return;
-    }
+  
 
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse(ip+'/sanad/uploadfile'),
-    );
-
-    // Add file to the request
-    request.fields['childID'] = idController.text;
-    request.files.add(
-  await http.MultipartFile.fromPath(
-    'file',
-    _file!.path,
-    contentType: MediaType('application', 'pdf'),
-  ),
-);
-
-
-    // Send the request
-    var response = await request.send();
-
-    // Check the server response
-    if (response.statusCode == 200) {
-      print('File uploaded successfully');
-    } else {
-      print('File upload failed with status ${response.statusCode}');
-    }
-  }
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   @override
@@ -223,6 +208,8 @@ File? _file;
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         backgroundColor: primaryColor,
         title: Text(
           "إضــافــة طــفـل جــديــد",
@@ -609,67 +596,30 @@ File? _file;
                 ],
               ),
             ),
-            Card(
-              color: primaryLightColor,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Container(
-                    width: 200,
-                    padding: EdgeInsets.only(bottom: 5),
-                    child: RoundedButton(
-                      color: primaryColor,
-                      text: "إضـافـة جـلـسـات",
-                      textColor: Colors.white,
-                      press: () {
-                        addSessionsDialog();
-                      },
-                    ),
-                  ),
-                  Spacer(),
-                  Text(
-                    "الـجــلـسـات",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontFamily: 'myFont', fontSize: 18),
-                  ),
-                  Icon(
-                    Icons.person,
-                    color: primaryColor,
-                  )
-                ],
-              ),
-            ),
-            SizedBox(height: 5,),
-            Card(
-              color: primaryLightColor,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _image == null
-                      ? Text('No image selected')
-                      : Image.file(_image!, height: 50.0),
-                  SizedBox(height: 20.0),
-                  Row(
+            SizedBox(height: 20,),
+               Card(
+                color: primaryLightColor,
+                child: Column(
+                  children:[ Row(
                     children: [
                       SizedBox(
                         width: 10,
                       ),
                       Container(
                         width: 200,
+                        padding: EdgeInsets.only(bottom: 5),
                         child: RoundedButton(
                           color: primaryColor,
-                          text: "تــحــمــيـل",
+                          text: "إضـافـة جـلـسـات",
                           textColor: Colors.white,
                           press: () {
-                            _getImage();
+                            addSessionsDialog();
                           },
                         ),
                       ),
                       Spacer(),
                       Text(
-                        "صــورة الـهـويـة",
+                        "الـجــلـسـات",
                         textAlign: TextAlign.right,
                         style: TextStyle(fontFamily: 'myFont', fontSize: 18),
                       ),
@@ -679,58 +629,18 @@ File? _file;
                       )
                     ],
                   ),
-                  SizedBox(height: 5,),
-                ],
+                  SizedBox(height: 15,)
+                ]),
               ),
-            ),
-            Card(
-              color: primaryLightColor,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                 _file != null
-                ? Text('Selected File: ${path.basename(_file!.path)}')
-                : Text('No file selected'),
-                  SizedBox(height: 20.0),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Container(
-                        width: 200,
-                        child: RoundedButton(
-                          color: primaryColor,
-                          text: "تــحــمــيـل",
-                          textColor: Colors.white,
-                          press: () {
-                            _getFile();
-                          },
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        "تـقـرير طــبـي",
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontFamily: 'myFont', fontSize: 18),
-                      ),
-                      Icon(
-                        Icons.person,
-                        color: primaryColor,
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 5,),
-                ],
-              ),
-            ),
-            SizedBox(height: 15,),
+            
+            SizedBox(height: 20,),
             RoundedButton(text: "حــفــظ", press: (){
-              addNewchild();
-              _uploadImage();
-              _uploadFile();
+              check(context);
+              if(checked){ 
+                addNewchild();
+              }
             }),
-            SizedBox(height: 15,)
+            SizedBox(height: 25,)
           ],
         )),
       ),

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
 import 'dart:io';
 
@@ -33,6 +33,8 @@ class _newSpecialestState extends State<newSpecialest> {
   String selectedValue3 = sessions.first;
   String ss="";
   String startDate="select Date";
+  bool date=false;
+  bool checked=false;
   DateTime selectedDate1 = DateTime.now();
   final TextEditingController fnameController = TextEditingController();
   final TextEditingController secnameController = TextEditingController();
@@ -92,6 +94,7 @@ class _newSpecialestState extends State<newSpecialest> {
     if (picked != null) {
       setState(() {
         selectedDate1 = picked;
+        date=true;
         startDate=DateFormat('yyyy/MM/dd').format(selectedDate1.toLocal());
       });
     }
@@ -169,10 +172,60 @@ class _newSpecialestState extends State<newSpecialest> {
 
     if(response.statusCode==200){
       print("Done");
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("نــجــاح",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.done,color: Colors.green,),
+          content: Text("تــم إضــافــة أخــصــائـي جــديــد بــنــجــاح",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
     }else{
       print("error");
     }
   }
+
+  void check(BuildContext context){
+  if(fnameController.text.trim().isEmpty ||
+    secnameController.text.trim().isEmpty || 
+    thnameController.text.trim().isEmpty || 
+    lnameController.text.trim().isEmpty || 
+    idController.text.trim().isEmpty || 
+    phoneController.text.trim().isEmpty||
+    addressController.text.trim().isEmpty||
+    ss.trim().isEmpty || date==false ){
+
+      checked=false;
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("تــحــذيــر",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.error,color: Colors.red,),
+          content: Text("يــجــب تــعــبــئــة جــمــيــع الــحــقـــول",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
+    }
+    else if(idController.text.length!=9){
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("تــحــذيــر",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.error,color: Colors.red,),
+          content: Text("رقــم الــهويــة يــجــب ان يــكــون 9 أرقــام",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
+    }
+    else if (phoneController.text.length <10){
+      showDialog(context: context, builder: (context){
+        return AlertDialog(
+          title: Text("تــحــذيــر",style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
+          icon: Icon(Icons.error,color: Colors.red,),
+          content: Text("رقــم الهــاتــف أقــل مـــن 10 خــانــات",style: TextStyle(fontFamily: 'myFont',fontSize: 18),textAlign: TextAlign.left,),
+        );
+      });
+    }
+      else{
+      checked=true;
+    }
+  }
+  
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
  
@@ -182,6 +235,8 @@ class _newSpecialestState extends State<newSpecialest> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         backgroundColor: primaryColor,
         title: Text(
           "إضــافــة أخـصـائـي جــديــد",
@@ -412,73 +467,78 @@ class _newSpecialestState extends State<newSpecialest> {
             ),
             Card(
               color: primaryLightColor,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Container(
-                        width: size.width * 0.5,
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton2<String>(
-                            isExpanded: true,
-                            hint: Text(
-                              'Select Item',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Theme.of(context).hintColor,
+              child: Column(
+                children:[
+                  SizedBox(height: 10,),
+                   Row(
+                  children: [
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Container(
+                          width: size.width * 0.5,
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton2<String>(
+                              isExpanded: true,
+                              hint: Text(
+                                'Select Item',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).hintColor,
+                                ),
                               ),
-                            ),
-                            items: sessions
-                                .map((item) => DropdownMenuItem(
-                                      value: item,
-                                      child: Text(
-                                        item,
-                                        style: const TextStyle(
-                                            fontSize: 14, fontFamily: 'myFont'),
-                                      ),
-                                    ))
-                                .toList(),
-                            value: selectedValue3,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedValue3 = value!;
-                                ss = value!;
-                              });
-                            },
-                            buttonStyleData: ButtonStyleData(
-                              height: 50,
-                              width: 160,
-                              padding:
-                                  const EdgeInsets.only(left: 14, right: 14),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  border:
-                                      Border.all(color: primaryColor, width: 2),
-                                  color: Colors.white),
-                              elevation: 2,
-                            ),
-                            dropdownStyleData: const DropdownStyleData(
-                              maxHeight: 200,
-                            ),
-                            menuItemStyleData: const MenuItemStyleData(
-                              height: 40,
+                              items: sessions
+                                  .map((item) => DropdownMenuItem(
+                                        value: item,
+                                        child: Text(
+                                          item,
+                                          style: const TextStyle(
+                                              fontSize: 14, fontFamily: 'myFont'),
+                                        ),
+                                      ))
+                                  .toList(),
+                              value: selectedValue3,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedValue3 = value!;
+                                  ss = value!;
+                                });
+                              },
+                              buttonStyleData: ButtonStyleData(
+                                height: 50,
+                                width: 160,
+                                padding:
+                                    const EdgeInsets.only(left: 14, right: 14),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(14),
+                                    border:
+                                        Border.all(color: primaryColor, width: 2),
+                                    color: Colors.white),
+                                elevation: 2,
+                              ),
+                              dropdownStyleData: const DropdownStyleData(
+                                maxHeight: 200,
+                              ),
+                              menuItemStyleData: const MenuItemStyleData(
+                                height: 40,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  Spacer(),
-                  Text(
-                    "الـتـخـصّـص",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontFamily: 'myFont', fontSize: 18),
-                  ),
-                  Icon(
-                    Icons.person,
-                    color: primaryColor,
-                  )
-                ],
-              ),
+                    Spacer(),
+                    Text(
+                      "الـتـخـصّـص",
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontFamily: 'myFont', fontSize: 18),
+                    ),
+                    Icon(
+                      Icons.person,
+                      color: primaryColor,
+                    )
+                  ],
+                ),
+                SizedBox(height: 10,),
+              ]),
             ),
             Card(
               color: primaryLightColor,
@@ -513,93 +573,12 @@ class _newSpecialestState extends State<newSpecialest> {
                 ],
               ),
             ),
-            Card(
-              color: primaryLightColor,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _image == null
-                      ? Text('No image selected')
-                      : Image.file(_image!, height: 50.0),
-                  SizedBox(height: 20.0),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Container(
-                        width: 200,
-                        child: RoundedButton(
-                          color: primaryColor,
-                          text: "تــحــمــيـل",
-                          textColor: Colors.white,
-                          press: () {
-                            _getImage();
-                          },
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        "صــورة مـزاولـة مـهـنة",
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontFamily: 'myFont', fontSize: 18),
-                      ),
-                      Icon(
-                        Icons.person,
-                        color: primaryColor,
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 5,),
-                ],
-              ),
-            ),
-            Card(
-              color: primaryLightColor,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                 _file != null
-                ? Text('Selected File: ${path.basename(_file!.path)}')
-                : Text('No file selected'),
-                  SizedBox(height: 20.0),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Container(
-                        width: 200,
-                        child: RoundedButton(
-                          color: primaryColor,
-                          text: "تــحــمــيـل",
-                          textColor: Colors.white,
-                          press: () {
-                            _getFile();
-                          },
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        "الســيـرة الـذاتـيـة",
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontFamily: 'myFont', fontSize: 18),
-                      ),
-                      Icon(
-                        Icons.person,
-                        color: primaryColor,
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 5,),
-                ],
-              ),
-            ),
             SizedBox(height: 15,),
             RoundedButton(text: "حــفــظ", press: (){
-              addSpecialestInfo();
-              _uploadImage();
-              _uploadFile();
+              check(context);
+              if(checked){
+                addSpecialestInfo();
+              }
             }),
             SizedBox(height: 15,)
             ]

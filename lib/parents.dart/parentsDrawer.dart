@@ -11,6 +11,8 @@ import 'package:sanad_software_project/adminPages/c.dart';
 import 'package:sanad_software_project/adminPages/chat.dart';
 import 'package:sanad_software_project/adminPages/showAllChildren.dart';
 import 'package:sanad_software_project/adminPages/showAllEmployee.dart';
+import 'package:sanad_software_project/parents.dart/homePageParent.dart';
+import 'package:sanad_software_project/parents.dart/personalPage.dart';
 import 'package:sanad_software_project/specialestPages/empPersonalInformation.dart';
 import 'package:sanad_software_project/specialestPages/empVications.dart';
 import 'package:sanad_software_project/specialestPages/homePage.dart';
@@ -20,17 +22,17 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:http/http.dart' as http;
 
 
-class spHomeDrawer extends StatefulWidget{
+class parentHomeDrawer extends StatefulWidget{
   final String id;
 
-  const spHomeDrawer({super.key, required this.id});
+  const parentHomeDrawer({super.key, required this.id});
   @override
   State<StatefulWidget> createState() {
-    return _spHomeDrawerState();
+    return _parentHomeDrawerState();
   }
 }
 
-class _spHomeDrawerState extends State<spHomeDrawer> {
+class _parentHomeDrawerState extends State<parentHomeDrawer> {
    String id="";
    String name="";
   final auth=FirebaseAuth.instance;
@@ -56,14 +58,14 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
   }
 
   Color hoveredColor = primaryLightColor;
-   late Widget container=spHomePage(id: id,name: "فطوم دريني",);
+   late Widget container=childSchdule(id: id);
 
     String imageUrl = '';
 
 
   Future<void> getImageUrl() async {
     print(id);
-    final String serverUrl = '$ip/sanad/getSPImage?id=$id';
+    final String serverUrl = '$ip/sanad/getImage?id=$id';
 
     try {
       final response = await http.get(Uri.parse(serverUrl));
@@ -82,7 +84,7 @@ class _spHomeDrawerState extends State<spHomeDrawer> {
   }
 
 Future<void> getSPname()async{
-  final spName = await http.get(Uri.parse("$ip/sanad/getsppnename?id=$id"));
+  final spName = await http.get(Uri.parse("$ip/sanad/getChildname?id=$id"));
   if(spName.statusCode==200){
     print("body "+spName.body.toString());
     final spNameBody=jsonDecode(spName.body);
@@ -143,7 +145,7 @@ Future<void> getSPname()async{
                   child: TextButton(
                     onPressed: () {
                       setState(() {
-                        container=spHomePage(id: "",name: "",);
+                        container=childSchdule(id: "");
                       });
                     },
                     style: TextButton.styleFrom(
@@ -193,7 +195,7 @@ Future<void> getSPname()async{
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          "الأطـــفــال",
+                          "جــلسات طــفــلــي",
                           style: TextStyle(
                             color: primaryColor,
                             fontFamily: 'myFont',
@@ -217,7 +219,7 @@ Future<void> getSPname()async{
                   child: TextButton(
                     onPressed: () {
                       setState(() {
-                        container=profile(id: id,);
+                        container=profileChild(id: id,);
                       });
                     },
                     style: TextButton.styleFrom(
@@ -267,7 +269,7 @@ Future<void> getSPname()async{
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          "الإجـــازات",
+                          "الـحسـاب",
                           style: TextStyle(
                             color: primaryColor,
                             fontFamily: 'myFont',
@@ -276,7 +278,7 @@ Future<void> getSPname()async{
                         ),SizedBox(
                             width: 8),
                         Icon(
-                          Icons.person, // Replace with the desired icon
+                          Icons.monetization_on, // Replace with the desired icon
                           color: primaryColor, // Set the color of the icon
                         ),
                         SizedBox(width: 30,),

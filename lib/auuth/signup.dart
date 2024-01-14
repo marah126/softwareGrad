@@ -10,6 +10,9 @@ import 'package:sanad_software_project/components/rounded_textField.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:sanad_software_project/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 
 
 class signup extends StatefulWidget {
@@ -59,7 +62,7 @@ class _signupState extends State<signup> {
     });
   }
 
-  Future<void> signupfun() async {
+Future<void> signupfun() async {
 
 showDialog<void>(
     context: context,
@@ -92,6 +95,7 @@ showDialog<void>(
 
       if(response.statusCode==200){
         var mass = jsonDecode(response.body.toString());
+        signUpWithEmailAndPassword();
         print("mass");
         showDialog(
         context: context,
@@ -104,6 +108,9 @@ showDialog<void>(
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                  return Login();
+                  }));
                 },
                 child: Text("OK"),
               ),
@@ -111,7 +118,9 @@ showDialog<void>(
           );
         },
       );
-      }else if(response.statusCode==501){
+      
+      }
+      else if(response.statusCode==501){
         showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -123,6 +132,7 @@ showDialog<void>(
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
+                   
                 },
                 child: Text("OK"),
               ),
@@ -130,6 +140,7 @@ showDialog<void>(
           );
         },
       );
+      
       }
       else{
         var mass = jsonDecode(response.body.toString());
@@ -154,6 +165,20 @@ showDialog<void>(
       );
       }
   }
+
+  Future<void> signUpWithEmailAndPassword() async {
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.toLowerCase(),
+    );
+
+    print('User signed up: ${userCredential.user!.uid}');
+  } catch (e) {
+    print('Error signing up: $e');
+  }
+}
+
 
   void check(){
     passwordStrength(passwordController.text);

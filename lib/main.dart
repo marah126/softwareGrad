@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:sanad_software_project/notification.dart';
 import 'package:sanad_software_project/theme.dart';
 import 'package:sanad_software_project/welcome.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:syncfusion_localizations/syncfusion_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 
 void main() async{
@@ -19,6 +22,7 @@ void main() async{
     ),
   );//:
   await Firebase.initializeApp();
+  await pushNotificationsManager().init();
   runApp( MyApp());
 }
 
@@ -38,6 +42,17 @@ class MyApp extends StatelessWidget {
         
       ),
       home: welcome(),
+      // locale: const Locale('ar'), // Set the locale to Arabic
+      // localizationsDelegates: [
+      //   SfGlobalLocalizations.delegate, // Add this delegate for Syncfusion localization
+      //   GlobalMaterialLocalizations.delegate,
+      //   GlobalWidgetsLocalizations.delegate,
+      //   GlobalCupertinoLocalizations.delegate,
+      // ],
+      // supportedLocales: [
+      //   const Locale('en'),
+      //   const Locale('ar'),
+      // ],
     );
   }
 }
