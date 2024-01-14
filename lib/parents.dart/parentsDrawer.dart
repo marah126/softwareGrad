@@ -309,7 +309,7 @@ Future<void> getSPname()async{
           IconButton(
             icon: Icon(Icons.message),
             onPressed: () {
-               Navigator.push(context, MaterialPageRoute(builder: (context){return ChatScreen();}));
+              // Navigator.push(context, MaterialPageRoute(builder: (context){return ChatScreen();}));
             },
           ),
          ],

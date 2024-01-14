@@ -1,59 +1,210 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sanad_software_project/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:sanad_software_project/theme.dart';
 
 class ChatScreen extends StatefulWidget {
-  //const ChatScreen({Key? key}) : super(key: key);
+  final String receiverID;
+  final String receiverName;
+
+  const ChatScreen({
+    Key? key,
+    required this.receiverID,
+    required this.receiverName,
+  }) : super(key: key);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  late String receiverID;
+  late String receiverName;
 
-  final auth=FirebaseAuth.instance;
-  final firestore=FirebaseFirestore.instance;
+  final auth = FirebaseAuth.instance;
+  final firestore = FirebaseFirestore.instance;
   late User? user;
 
-  TextEditingController messageText= TextEditingController();
+  TextEditingController messageText = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  void getUser(){
-    try{
-        final currentUser = auth.currentUser;
+
+  
+
+
+  void getUser() {
+    try {
+      final currentUser = auth.currentUser;
       if (currentUser != null) {
         setState(() {
           user = currentUser;
         });
         print(user!.email);
       }
-    }catch(e){
+    } catch (e) {
       print(e);
     }
   }
 
-  // void getMessages()async{
-  //   final messages= await firestore.collection('messages').get();
-  //   for(var message in messages.docs){
-  //     print(message.data());
-  //   }
-  // }
-
-  void messageStreams() async{
-    await for (var snapshot in firestore.collection('messages').snapshots()){
-      for(var message in snapshot.docs){
-        print(message.data());
-      }
-    }
-  }
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    receiverID = widget.receiverID;
+    print("rec chat id "+receiverID);
+    receiverName = widget.receiverName;
     getUser();
   }
+
+// Stream<List<messageContainer>> getMessagesStream(String recID) async* {
+//   print("rec id from func $recID");
+
+//   List<messageContainer> allMessages = [];
+
+//   // Execute the first query
+//   List<messageContainer> adminMessages = await getAdminMessages(recID);
+//   print("aaaaaaaaaaaaa"+adminMessages.length.toString());
+
+//   for(int i=0;i<adminMessages.length;i++){
+//     print("****index "+i.toString()+adminMessages[i].text!+"***");
+//     allMessages.add(adminMessages[i]);
+//   }
+//   for(int i=0;i<allMessages.length;i++){
+//     print("/////"+allMessages[i].text!+"/////");
+//   }
+//   print("///////////////////////////////////////////////////////////////////////////////////////////////////////");
+
+//   // Execute the second query
+//   List<messageContainer> recIDMessages = await getRecIDMessages(recID);
+
+//   for(int i=0;i<recIDMessages.length;i++){
+//     print("==="+recIDMessages[i].text!+"====");
+//     allMessages.add(recIDMessages[i]);
+
+//   }
+//   // Sort all messages based on time in descending order
+//   //allMessages.sort((a, b) => b.time!.compareTo(a.time!));
+
+//     for(int i=0;i<allMessages.length;i++){
+//       print("/////"+allMessages[i].text!+"/////");
+//     }
+//     allMessages.sort((a, b) {
+//     if (a.time == null && b.time == null) {
+//       return 0;
+//     } else if (a.time == null) {
+//       return 1;
+//     } else if (b.time == null) {
+//       return -1;
+//     } else {
+//       Timestamp aTimestamp = a.time!;
+//       Timestamp bTimestamp = b.time!;
+//       return bTimestamp.compareTo(aTimestamp);
+//     }
+//     });
+//   // Add this line to yield allMessages
+//  // yield allMessages;
+//   // Yield the combined and sorted list
+//   yield allMessages;
+// }
+
+
+Stream<List<messageContainer>> getMessagesStream(String recID) async* {
+  print("rec id from func $recID");
+
+  List<messageContainer> allMessages = [];
+
+  // Execute the first query
+  List<messageContainer> adminMessages = await getAdminMessages(recID);
+  allMessages.addAll(adminMessages);
+
+  // Execute the second query
+  List<messageContainer> recIDMessages = await getRecIDMessages(recID);
+  allMessages.addAll(recIDMessages);
+  
+
+  for(int i=0; i<allMessages.length ; i++){
+    print(allMessages[i].text!+" **** "+allMessages[i].time!.toDate().toString());
+  }
+  // Sort all messages based on time in descending order
+   allMessages.sort((a, b) => a.time!.compareTo(b.time!));
+
+
+
+  // Yield the combined and sorted list
+  yield allMessages;
+}
+
+// ... (other functions remain unchanged)
+
+
+Future<List<messageContainer>> getAdminMessages(String recID) async {
+  print("Querying admin messages");
+
+  Stream<QuerySnapshot> adminSentStream = firestore
+    .collection('messages')
+    .where('sender', isEqualTo: 'admin')
+    .where('receiver', isEqualTo: recID)
+    .orderBy('time')
+    .snapshots();
+
+  QuerySnapshot adminSnapshot = await adminSentStream.first;
+
+  print("Admin sent stream data: ${adminSnapshot.docs.length}");
+
+  adminSnapshot.docs.forEach((doc) {
+    print("Document data: ${doc.data()}");
+  });
+
+  List<messageContainer> adminMessages = getMessageContainers(adminSnapshot);
+  return adminMessages;
+}
+
+Future<List<messageContainer>> getRecIDMessages(String recID) async {
+  print("Querying recID messages");
+  Stream<QuerySnapshot> recIDSentStream = firestore
+    .collection('messages')
+    .where('sender', isEqualTo: recID)
+    .where('receiver', isEqualTo: 'admin')
+    .orderBy('time')
+    .snapshots();
+
+  QuerySnapshot recIDSnapshot = await recIDSentStream.first;
+
+  print("RecID sent stream data: ${recIDSnapshot.docs.length}");
+
+  recIDSnapshot.docs.forEach((doc) {
+    print("Document data: ${doc.data()}");
+  });
+
+  List<messageContainer> recIDMessages = getMessageContainers(recIDSnapshot);
+
+  return recIDMessages;
+}
+
+
+
+
+  List<messageContainer> getMessageContainers(QuerySnapshot snapshot) {
+    return snapshot.docs.map((message) {
+      final mText = message['text'];
+      final sender = message['sender'];
+       final time = message['time'] as Timestamp?;
+      // Convert the timestamp to a DateTime object
+      
+
+      return messageContainer(
+        sender: receiverName,
+        text: mText,
+        isME: sender == 'admin',
+        time: time,
+      );
+    }).toList();
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,16 +212,16 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: primaryColor,
         title: Row(
           children: [
-            Icon(Icons.chat_bubble,color: primaryLightColor,),
+            Icon(Icons.chat_bubble),
             SizedBox(width: 10),
-            Text('MessageMe')
+            Text('الــمـحـادثــات',style: TextStyle(fontFamily: 'myFont',fontWeight: FontWeight.bold,fontSize: 20),),
           ],
         ),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {
-              // add here logout function
-              messageStreams();
+              // Add logout function here
             },
             icon: Icon(Icons.close),
           )
@@ -81,33 +232,34 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            //Container(),
-            StreamBuilder<QuerySnapshot>(stream: firestore.collection('messages').orderBy('time').snapshots(), builder: (context,snapshot){
-              List<messageContainer>messageWidget=[];
-              if(!snapshot.hasData){
-                //
-              }
-              final messages=snapshot.data!.docs;
-              for(var message in messages){
-                final mText=message.get('text');
-                final sender=message.get('sender');
-                final currentUser=user!.email;
-
-                final widget=messageContainer(sender: sender,text: mText,isME: currentUser==sender,);
-                messageWidget.add(widget);
-
-              }
-              return Expanded(child:
-               ListView(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                children: messageWidget,));
-            }),
+            StreamBuilder<List<messageContainer>>(
+              stream: getMessagesStream(receiverID),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  print('Error: ${snapshot.error}');
+                  return Text('Error: ${snapshot.error}');
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  print("sssssssssssss No messages available");
+                  return CircularProgressIndicator();
+                } else {
+                  final messages = snapshot.data!;
+                  return Expanded(
+                    child: ListView(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      children: messages,
+                    ),
+                  );
+                }
+                return Container();
+              },
+            ),
             Container(
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: secondaryColor,
+                    color: primaryColor,
                     width: 2,
                   ),
                 ),
@@ -130,25 +282,33 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      firestore.collection('messages').add({
-                        'text':messageText.text,
-                        'sender':user!.email,
-                        'time':FieldValue.serverTimestamp(),
-                      });
-                      messageText.clear();
-                      _scrollController.animateTo(duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,_scrollController.position.maxScrollExtent);
+                    onPressed: () async {
+                      if (messageText.text.trim().isNotEmpty) {
+                        await firestore.collection('messages').add({
+                          'text': messageText.text,
+                          'sender': 'admin',
+                          'receiver': receiverID,
+                          'time': FieldValue.serverTimestamp(),
+                        });
+
+                        messageText.clear();
+
+                        // _scrollController.animateTo(
+                        //   duration: Duration(milliseconds: 300),
+                        //   curve: Curves.easeInOut,
+                        //   _scrollController.position.maxScrollExtent,
+                        // );
+                      }
                     },
                     child: Text(
-                      'send',
+                      'Send',
                       style: TextStyle(
                         color: primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -159,14 +319,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-
-
 class messageContainer extends StatelessWidget{
   final String? text;
   final String? sender;
   final bool? isME;
+    final Timestamp? time; // Add this line
 
-  const messageContainer({super.key, this.text,this.isME, this.sender});
+
+  const messageContainer({super.key, this.text,this.isME, this.sender, this.time});
 
   @override
   Widget build(BuildContext context) {
