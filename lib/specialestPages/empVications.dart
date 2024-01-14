@@ -168,7 +168,7 @@ class _vicationsState extends State<vications> {
       final details=jsonDecode(detailsResponse.body);
       setState(() {
         sickRem=details['sickRemaining'].toString();
-        yearlyRem=details['all'].toString();
+        yearlyRem=details['yearlyRemaining'].toString();
         shifted=details['shifted'].toString();
       });
       print(sickRem);
