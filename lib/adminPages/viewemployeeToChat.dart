@@ -87,42 +87,7 @@ class _chatState extends State<chat> {
   }
 
 
-  Future<DateTime?> getLastMessageTime(String sender, String receiver) async {
-  try {
-    // Reference to your Firestore collection
-    CollectionReference messagesCollection = FirebaseFirestore.instance.collection('messages');
-
-    // Query to get messages where (sender is sender and receiver is receiver) OR (sender is receiver and receiver is sender),
-    // ordered by time in descending order, and limit to 1 document
-    QuerySnapshot querySnapshot = await messagesCollection
-        .where('(sender == $sender && receiver == $receiver) || (sender == $receiver && receiver == $sender)')
-        .orderBy('time', descending: true)
-        .limit(1)
-        .get();
-
-    // Check if there is any document in the result
-    if (querySnapshot.docs.isNotEmpty) {
-      // Get the first document (latest message)
-      DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
-
-      // Access the 'time' field from the document
-      Timestamp timestamp = documentSnapshot['time'] as Timestamp;
-
-      // Convert the timestamp to a DateTime object
-      DateTime dateTime = timestamp.toDate().toUtc();
-      String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
-
-      print('Last message time: $formattedDateTime');
-      return dateTime;
-    } else {
-      // No messages found in both cases
-      return null;
-    }
-  } catch (e) {
-    print('Error getting last message time: $e');
-    return null;
-  }
-}
+  
 
   List<Map<String, String>> Freinds = [
     {
@@ -208,13 +173,6 @@ class _chatState extends State<chat> {
                         builder: (context) => ChatScreen(receiverID: data[index]['id'],receiverName: data[index]['Fname'],)
                       ),
                     );
-                    DateTime? lastMessageTime = await getLastMessageTime('admin', data[index]['id']);
-                    if (lastMessageTime != null) {
-                      print('Last message time: $lastMessageTime');
-                    } else {
-                      print('No messages found.');
-                    }
-
                   },
                 child: Column(
                   children: <Widget>[
@@ -223,11 +181,7 @@ class _chatState extends State<chat> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
-                          SizedBox(width: 5,),
-                          Text(
-                            Freinds[index]['date'] ?? '',
-                            style: TextStyle(fontFamily: 'myFont',fontSize: 16),
-                          ),
+                          
                           Spacer(),                           
                              Column(
                               children: <Widget>[
@@ -246,7 +200,7 @@ class _chatState extends State<chat> {
                             //     ),
                               ],
                             ),
-                            SizedBox(width: 10,),
+                            SizedBox(width: 30,),
                             ClipOval(
                               child: imageID.contains(data[index]['id'])
                                   ? Image.network(
